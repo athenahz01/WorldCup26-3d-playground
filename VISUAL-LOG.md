@@ -80,3 +80,89 @@ Phase A, all five items landed and verified:
 - A5 Golden Gate and water: shore teleport replaced with a 2.5 s eased lift ride (path-ride rig), descend prompts at both deck ends, railings raised to 1.5 with collision. Universal water rule: feet under the sea splashes, banners "fished out", and tweens you to the nearest station — verified end to end off the Miami shore, landing on dry ground at a station.
 
 Phase B, deferred entirely on budget (in rank order, untouched): B1 wayfinding totems and map legend, B2 passport stamps, B3 ride photo, B4 park population, B5 fireworks finale, B6 hi-fi odds and ends. Console clean through every Phase A test.
+
+## Pass 8 — 2026-07-10, debts cleared and Phase B shipped
+
+Debts:
+- Ball beauty shot captured at last: round 24x18 silhouette, pentagon panels with seams, contact shadow grounding it on the center spot. Reads as a football.
+- Sailboats exist and float correctly (confirmed from directly above the SF bay); they were simply too small to read, so all six scaled 1.9x. No ghost feature.
+- Cloud shadows confirmed clearly visible at surface level (mottled drift across the bay water and shorelines). Kept as is.
+
+Phase B, B1 through B5 shipped and verified; B6 (star band, paving texture, lens flare, tree variants, heat shimmer) deferred on budget:
+- B1 wayfinding: additive light beams over all 16 stations (cool blue, tall) and the five signature experiences (gold, shorter), pulsing, brighter at night, dimmed to 25 percent at adaptive level 1. Bobbing gold marker sprites over every interaction point (dropped at level 1). Four first-run tips wired to first station approach, first landing, first stadium entry, and first nightfall, each once per session. Map legend added with station squares, experience triangles, the live roaming-train dot, the player arrow, and gold rings on stamped cities. Verified: beams visible across the park in one frame; legend and markers all present on the map capture.
+- B2 passport: entering a pitch stamps the city; HUD shows "PASSPORT n / 16"; 16 of 16 fires a champion banner, golden burst, and a permanent star on the HUD line. Verified 0 to 3 across three cities with matching gold rings on the map.
+- B3 ride photo: auto-captured at the track's biggest drop (computed from the spline), offered at dismount ("your ride photo, press Enter to save"), Enter downloads, one per lap. Verified through a full boosted lap: capture fired, offer appeared, Enter saved.
+- B4 population: thirty instanced two-tone visitors bob-walking the promenade legs with lateral offsets; no collision; first thing dropped at adaptive level 1.
+- B5 finale: at night every 4 minutes, a 20 second multi-volley show over MetLife with crackle ticks, banner cue on first firing. Verified: "THE FINALE" banner fired on schedule at night.
+
+Console clean through the entire pass.
+
+## Pass 9 — 2026-07-10, B6 hi-fi odds and ends (all five, in order)
+
+- Galactic band: 2,400 extra faint stars concentrated along a tilted great-circle lane, folded to the upper sky, fading with dawn alongside the main field. Confirmed dense layered stars in the night look-up frame (band shape is subtle at JPEG scale).
+- Paving texture: 128 px tiling canvas (joint grid plus speckle) on a dedicated promenade batch so lamps, tents, and arches keep their flat colors. Reads clearly underfoot at the archway gate.
+- Sun lens flare: main bloom plus a ghost sprite, driven by view-sun alignment to the tenth power and off at night. The golden-hour sunward frame with the ribbon crossing the flare is poster material.
+- Two tree variants: columnar poplars (24 percent of temperate broadleaf spawns) and low twin-blob shrubs (35 percent of dry-land agave spawns), both instanced like the rest.
+- Texan heat shimmer: two wide low additive strips over the Dallas and Houston flats, opacity peaking at midday, gently pulsing scale and height, dropped at adaptive level 1. Decorative by design and honestly subtle.
+
+Regression caught and fixed during verification: plaza fountain particles blew out into huge white blobs at close range once ground-level framing improved; particle size and opacity roughly halved, now reads as water jets.
+
+Console clean through night, day, golden hour, and noon checks.
+
+## Pass 10 — 2026-07-10, art direction
+
+Bugs first:
+- Empty-banner black box: the banner is now visibility-hidden unless active, and empty text nodes display:none. Nothing paints when there is no content.
+- Shadow banding: shadow camera depth range tightened from 200-2200 to 400-1500 (4x better depth precision at the current map size), bias -0.0005 with normalBias 0.6; PCFSoft was already active. Side effect accepted: the very highest cloud shadow casters can clip at exact noon.
+
+1. Map redrawn as a designed artifact (before: p8-map, after: p10-map). Smooth ray-marched island silhouette with a two-step shore glow over two-tone water; painterly elevation tints (highland gold, three mountain masses, darker evergreen north) clipped to the island; the full Grand Circuit as a continuous silver line with the knockout road in solid gold over it; thin continuous spur lines; city dots with drop shadows and name pills; stations and experiences baked in; legend rebuilt as a footer bar. Click-to-travel, stamped rings, live train dot, and the player arrow all still work on top.
+
+2. Sky rebuilt (before: p3-dusk, after: p10-dusk). Four-stop ramp (below-horizon fade, fog-matched haze band, mid sky, zenith) so terrain melts into sky at every hour; dusk shows a smooth orange-to-plum blend with no hard boundary. Sun glow now swells near the horizon. Clouds are lobed composites with lighter tops and flat shaded bottoms in three variants, tinted white at noon, sun-warm at dusk, slate at night. Star band and lens flare confirmed alive under the new gradient.
+
+3. Ground composition. Every city gained a designed avenue from its boarding station to the plaza: paved with the B6 texture, alternating poplar pairs and banner-pole pairs with lamps and flags. Plaza edges defined by hedge rings (gaps kept clear at the gate and avenue). Landing pitch still settles at +0.03. The hero-plaza foot view now has hedges, trees, and buildings in frame instead of open lawn, though the mex outward view remains the least dense angle.
+
+4. Landscape. Wild trees rebuilt as 5-12 tree groves with clearings (same ~1,050 budget), biome per grove so regions read distinct from the air; avenue rows come out of the same budget. Decorative furniture was already plaza-bound, no scatter to cut. Wayfinding totems now fade to 7 percent by day (the white glitch-strips are gone from daylight frames) and rise through dusk into night.
+
+Sweep: console clean; begin, look, map open/travel/close, walk, fly, stadium entry and a kick all pass. The ride-leg dismount sample returned still-riding inside the harness polling window; the dismount mechanic itself is untouched since its pass-7 verification.
+
+## Pass 11 — 2026-07-10, from park to game: framework plus the first two games
+
+1. Framework. localStorage save (try/catch wrapped, silently session-only if unavailable) persisting stamps, stars, points, per-challenge bests, pins, tips, and goal state; a two-click "reset progress" on the title screen. Fan points and a 3-star-per-city system (stamp, bronze-or-better, gold) with the tally, points, and pin count on the HUD and per-city stars under the map labels. The goal arc reads "ROAD TO THE FINAL, earn 24 stars"; at 24 the banner fires, the MetLife totem turns gold, and the map marks "THE FINAL AWAITS" (the Final itself is a future pass). One reusable challenge shell: title card with rules and medal thresholds, run state with HUD, result card with score/medal/points/best, Space to start, R to retry, Esc to quit. Verified: stamping a city granted a star and 50 points, and stars, points, and bests survived a full page reload.
+
+2. Penalty shootout at every stadium (E at the penalty spot). Articulated keeper who idles, winds, and dives with difficulty scaled by the city's tournament round (read chance .28 to .76 by round); mouse-aimed reticle projected onto the goal mouth; hold-release Space power bar where soft shots get saved and over .92 clears the bar; keeper commits on release, honest, no rubber-banding. 3/4/5 goals for bronze/silver/gold, gold requiring a top-corner finish; medals grant points and the city's challenge stars; bests persist. Verified by playing: a 5/5 gold with top corners (result card, 400 points, bronze and gold stars), a deliberate 0/5 loss (every shot over the bar), a mid-run Esc quit that cleaned up, and best-of-5 surviving reload.
+
+3. Golden pin hunt: 30 pins - one near every city landmark, the Golden Gate mid-span, a station platform, the coaster's big drop, Liberty point, the Boston lighthouse walk, the volcano rim and the saddle (flight rewards), the seaplane dock, and the golden-road rest plazas. Bob, spin, glint material, proximity chime within 20 units, collect on touch for points, milestones at 10/20/30, all 30 a star and a badge. Placement audit found five spawns hovering over water where the wading rescue would block collection; the placer now walks shoreline spawns inland until dry. Final audit: 30 total, 25 foot-reachable, 5 flight rewards, none wet. Verified collecting five on foot including the bridge and platform pins, counter and save confirmed.
+
+Console clean through every test. Future passes 12 to 15 intentionally untouched.
+
+## Pass 12 — 2026-07-10, three pitch games
+
+All three plug into the Pass 11 challenge shell and reuse the ball physics; the shootout, pins, and framework are untouched apart from shared guards. The four games sit at spaced pitch spots - penalty spot, halfway line, corner, center circle - and all four prompts were confirmed individually reachable at Arrowhead with no overlap. Bronze/gold feed the SAME two per-city challenge stars (verified: a crossbar gold at KC did not duplicate the stars the shootout had already earned). Each game keeps its own best (pk_/cb_/sl_/ku_ keys) and the Pass 11 save loaded unbroken with the new fields merging in.
+
+1. Crossbar challenge: five strikes from 12/16/20/25/30, shared reticle and power bar, no keeper. Bar detection is a generous band at the crossing plane (bar radius plus a half ball width); posts count half; a strike pings (new metallic partials sound) and visibly wobbles an overlay bar. Soft shots fall short, overcooked sail. Verified: a 5-hit gold run (aim pitch asin(1.52/1.1d), power .6 - deterministic), a 0-hit fail with everything short, and clean Esc handling.
+
+2. Dribble slalom: five S-pattern gates plus a finish, glowing next-gate markers, timer from first ball touch, +2 s missed gate (flashes red, stays checked), +1 s toppled cone with a physics flop. Course spawns per run and despawns on quit or finish. Balance: my clean scripted run was 17.3 s, so gold 19 / silver 22 / bronze 26 (+10/25/50 percent). Verified: a full run finishing at 17.3 s with every gate logged in order, result card, best saved.
+
+3. Keepy-uppy: click or Space pops the ball with a home-nudge plus drift that grows .14 per touch; streak ends on ground contact. 10/25/50 medals, 5 points per touch with a +1 multiplier step per 10 streak. Verified: a 12-touch bronze run with result card and best saved, an accidental-but-valid 1-touch drop proving the ground-end path, and a genuine mid-air Esc quit that cleaned up with the player still on the pitch.
+
+Regression: a full 5/5 shootout round after all three games, bests intact (pk 5, cb 5, sl 17.3, ku 12). Console clean through every test.
+
+Balance numbers for the owner: crossbar points = distance x10 per bar hit (x5 posts) + 150/75/40 medal bonus; slalom 300/160/90/20; keepy 5/touch with streak multiplier + 200/100/50; all tuned around the 17.3 s slalom reference run.
+
+## Pass 13 — 2026-07-11, the beauty pass
+
+0. Tone mapping: ACESFilmic confirmed, deliberate exposures per hour lerped through the stops - noon 1.11, golden hour 1.18, dusk 1.10, night 1.00. No materials were compensating with baked brightness.
+
+1. Bloom: EffectComposer + UnrealBloomPass (matching r160 addons) on a HalfFloat HDR target with threshold 1.0, so only genuine emitters bloom - daytime diffuse stays clean. Strength .22 day to .77 night, plus a day-only altitude lift for the aerial. OutputPass handles tone mapping and color space. First retune of the pass: the night aerial initially nuked the island (ribbon boost x night boost multiplied); boosts are now additive and capped at 2.4.
+
+2. Reflections: a PMREM environment captured from the procedural sky dome, refreshed when dayT moves .02 (never per frame). Hero surfaces only: the trophy gold and all glass (canopies, windows, bench roofs) converted to MeshStandardMaterial, coaster rails to metal Standard. Terrain, trees, tents stay Lambert.
+
+3. Water 2.0: per-vertex shore proximity from the island mask drives a turquoise shallow band grading to navy offshore around every coastline; a sun-direction glitter streak that stretches at low sun; foam ring tightened to hug the waterline. The dusk coastline frame (shallows + glitter + bloom sun) is a poster on its own. Note: Miami's deco strip now visibly stands in the shallows - reads as a stylized stilt strip, kept.
+
+4. God view: fog density fades 93 percent above 250 to 650 altitude so the island renders crisp from height and hazy from the ground, blended smoothly; a full sand beach band rings the island into the turquoise; biome palette harmonized warm (pnw 40694c, ca b2a562, mex ac9a60, tex c6a878, plains 8fae5f, se 619455, tropic 7cb56a, ne 639659, lawn 74a85e, sand e2cfa2/e8d5a6, paths d9c9a2, plaza cfc4ac, water 16537a to 2fd4c4 shallows, gold e8b84b); the golden road gets an altitude emissive boost (capped) making it the island's strongest line; flight ceiling raised 900 to 1400 - the whole island fits one frame with margin at 1250.
+
+5. Finishers: a 14-ray sun-shaft sprite at dawn/dusk fading with view angle; new sessions start at golden hour (dayT .60) with the cycle position persisted in the save for returning players; 120 golden-hour dust motes drifting within 40 units of the ground camera, faded in and out.
+
+Adaptive ladder, new order: level 1 drops bloom, level 2 drops glow sprites, markers, visitors, shimmer, level 3 drops pixel ratio, level 4 drops shadows. FPS statement: real-GPU rates remain unmeasurable in the harness (rAF-suspended tab); bloom is half-res and first to drop, and everything else added this pass is sprites, uniforms, or one 128-sphere PMREM capture every few sim-minutes.
+
+Verified: the four money shots captured (island golden hour at 1250 altitude - THE shot; island at night with balanced bloom jewelry; dusk coastline; golden plaza with the gate framing the stadium); a ride leg under the post chain with a 103 KB photo-mode bloom capture and a clean dismount; console clean through everything.
