@@ -785,6 +785,17 @@ function makeMetLifePitchMaterial(){
 }
 const metlifePitchMat=makeMetLifePitchMaterial();
 
+/* Pass 22 — Dallas uses a crisp indoor broadcast surface with a cool roof sheen. */
+const dallasPitchMat=metlifePitchMat.clone();
+dallasPitchMat.color=new THREE.Color(0xeaf3ee);
+dallasPitchMat.roughness=.69;
+dallasPitchMat.clearcoat=.055;
+dallasPitchMat.envMapIntensity=.42;
+const miamiPitchMat=sofiPitchMat.clone();
+miamiPitchMat.color=new THREE.Color(0xe8fff2);
+miamiPitchMat.roughness=.78;
+miamiPitchMat.envMapIntensity=.36;
+
 /* ---------------- plaque texture ---------------- */
 function makePlaqueTex(city){
   const cv=document.createElement('canvas');cv.width=512;cv.height=340;
@@ -1036,6 +1047,18 @@ dal(ctx){
   /* glass end walls */
   S.G.add(PRIM.box,0x9fc4dd,-76,15,0,0,3,28,84);
   S.G.add(PRIM.box,0x9fc4dd,76,15,0,0,3,28,84);
+  /* Pass 22: layered silver facade, giant end portals, and structural scale. */
+  for(const sx of[-1,1]){
+    for(let z=-45;z<=45;z+=9)S.O.add(PRIM.box,0x8e979f,sx*78,15,z,0,2.2,27,1.05);
+    S.O.add(PRIM.box,0x1b2e55,sx*79.4,13,0,0,.8,17,38);
+    S.E.add(PRIM.box,0x7fd8ff,sx*79.9,21,0,0,.16,.18,34);
+  }
+  for(const sz of[-1,1]){
+    for(let x=-62;x<=62;x+=12)S.O.add(PRIM.box,0xaab1b8,x,14,sz*59,0,1.15,24,2.1);
+    S.O.add(PRIM.box,0x202f49,0,10,sz*60.3,0,50,14,.8);
+  }
+  /* arch crowns remain readable from the Grand Circuit. */
+  for(const x of[-62,-42,-22,0,22,42,62])S.E.add(PRIM.box,0xd8eeff,x,41,-16,0,7,.16,.22);
 },
 /* ---- NRG: crisp white box, split retractable roof ---- */
 hou(ctx){
@@ -1088,6 +1111,14 @@ mia(ctx){
   }
   S.E.add(PRIM.box,0x35e0d2,0,cy-1.6,-hd/2,0,hw,0.7,0.7);  /* aqua trim  */
   S.E.add(PRIM.box,0x35e0d2,0,cy-1.6, hd/2,0,hw,0.7,0.7);
+  /* Pass 23: coral counter-light, canopy fins, and open-air festival scale. */
+  S.E.add(PRIM.box,0xff6f91,0,cy-2.35,-hd/2-.25,0,hw*.72,.18,.2);
+  S.E.add(PRIM.box,0xff6f91,0,cy-2.35, hd/2+.25,0,hw*.72,.18,.2);
+  for(const sx of[-1,1])for(let z=-42;z<=42;z+=12){
+    S.O.add(PRIM.box,0xd9dedf,sx*71,16,z,0,1.15,27,3.2,0,0,sx*.055);
+    S.E.add(PRIM.box,(Math.round(z/12)&1)?0x35e0d2:0xff6f91,sx*72,10,z,0,.16,9,.18);
+  }
+  for(let x=-56;x<=56;x+=14)S.E.add(PRIM.box,(x/14)%2?0x35e0d2:0xff6f91,x,cy-.22,-58.7,0,7,.15,.16);
 },
 /* ---- BMO Field: intimate, two roofed stands ---- */
 tor(ctx){
@@ -1220,7 +1251,7 @@ function buildBowlInterior(ctx,sGroup){
    S.O.add(rg,0xb3aea3,0,topY+.6,0,0,1,1,sq);}
   /* apron + pitch */
   S.O.add(PRIM.disc,0x3c7a40,0,b.pitchY,0,0,(b.rx0)*2,.3,(b.rz0)*2);
-  const pm=new THREE.Mesh(pitchGeo,city.id==='mex'?aztecaPitchMat:(city.id==='la'?sofiPitchMat:(city.id==='ny'?metlifePitchMat:pitchMat)));
+  const pm=new THREE.Mesh(pitchGeo,city.id==='mex'?aztecaPitchMat:(city.id==='la'?sofiPitchMat:(city.id==='ny'?metlifePitchMat:(city.id==='dal'?dallasPitchMat:(city.id==='mia'?miamiPitchMat:pitchMat)))));
   pm.position.y=b.pitchY+.32;pm.receiveShadow=true;sGroup.add(pm);
   if(city.id==='mex'){
     /* walkout reveal: a quiet line of floor lights from tunnel to the pitch */
@@ -2380,6 +2411,105 @@ const nyFinal={lights:[],targets:[],savedDayT:null,active:false,t:0,flashers:[],
   }
 }
 
+/* Pass 22 — Dallas / AT&T Stadium: enclosed-event scale and Power Play. */
+const dallasEvent={lights:[],targets:[],savedDayT:null,active:false,t:0,halo:null,haloMat:null,pulse:0};
+{
+  const st=stadiums.dal,targetBase=new THREE.Vector3(st.center.x,st.city.py+st.bowl.pitchY+1.4,st.center.z);
+  const localLights=[[-67,37,-43],[-67,37,43],[67,37,-43],[67,37,43],[0,43,-48],[0,43,48]];
+  for(let i=0;i<localLights.length;i++){
+    const p=localLights[i],v=new THREE.Vector3(p[0],p[1],p[2]).applyAxisAngle(Y,st.rot);
+    const target=new THREE.Object3D();target.position.copy(targetBase);scene.add(target);
+    const L=new THREE.SpotLight(i<4?0xe6f2ff:0x7fd8ff,0,250,Math.PI*.19,.52,1.05);
+    L.position.set(st.center.x+v.x,st.city.py+st.bowl.pitchY+v.y,st.center.z+v.z);
+    L.target=target;L.castShadow=false;scene.add(L);dallasEvent.lights.push(L);dallasEvent.targets.push(target);
+  }
+
+  /* Monumental entrance portal and low floor studs do all arrival guidance. */
+  const ent=st.entrance,dir=new THREE.Vector3().subVectors(st.center,ent);dir.y=0;dir.normalize();
+  const side=new THREE.Vector3(-dir.z,0,dir.x),portalPos=ent.clone().addScaledVector(dir,-8),yaw=Math.atan2(dir.x,dir.z);
+  const portal=new THREE.Group();portal.position.copy(portalPos);portal.rotation.y=yaw;scene.add(portal);
+  const B=new Batch(),E=new Batch();
+  for(const x of[-9.2,9.2]){B.add(PRIM.box,0xaeb5bc,x,6,0,0,1.45,12,1.55);E.add(PRIM.box,0x7fd8ff,x,6,-.82,0,.15,10,.12);}
+  B.add(PRIM.box,0xd5d9dd,0,12.1,0,0,20,1.2,1.7);E.add(PRIM.box,0xeaf6ff,0,11.35,-.9,0,17.4,.14,.13);
+  const bm=B.build(MAT.opaque,true),em=E.build(MAT.glow,false);if(bm)portal.add(bm);if(em)portal.add(em);
+  const pt=textTex('DALLAS  •  AT&T STADIUM','#ffffff','#101d36','900 58px "Segoe UI",sans-serif',1280,144);
+  const ps=new THREE.Mesh(new THREE.PlaneGeometry(16.8,1.9),new THREE.MeshBasicMaterial({map:pt,toneMapped:false}));ps.position.set(0,12.08,-.92);portal.add(ps);
+  for(let i=0;i<13;i++){
+    const c=ent.clone().addScaledVector(dir,-15-i*6.2);
+    for(const s of[-1,1]){
+      const p=c.clone().addScaledVector(side,s*5.4);
+      const stud=new THREE.Mesh(new THREE.CylinderGeometry(.25,.31,.12,12),new THREE.MeshBasicMaterial({color:0x7fd8ff,toneMapped:false}));
+      stud.position.set(p.x,st.city.py+.18,p.z);scene.add(stud);
+    }
+  }
+
+  /* The Texas Halo: a four-sided suspended screen, intentionally oversized. */
+  const cv=document.createElement('canvas');cv.width=1280;cv.height=360;const g=cv.getContext('2d');
+  const grad=g.createLinearGradient(0,0,1280,0);grad.addColorStop(0,'#08152b');grad.addColorStop(.5,'#16345d');grad.addColorStop(1,'#09172d');
+  g.fillStyle=grad;g.fillRect(0,0,1280,360);g.fillStyle='#dbeaff';g.fillRect(0,0,1280,9);g.fillStyle='#7fd8ff';g.fillRect(0,351,1280,9);
+  g.textAlign='center';g.fillStyle='#fff';g.font='900 78px "Segoe UI",sans-serif';g.fillText('POWER PLAY',640,137);
+  g.fillStyle='#8fdfff';g.font='800 30px "Segoe UI",sans-serif';g.fillText('DALLAS  •  SEMIFINAL NIGHT',640,205);
+  g.fillStyle='#c9d5e7';g.font='650 22px "Segoe UI",sans-serif';g.fillText('CONTROL THE POWER  •  OWN THE MOMENT',640,274);
+  const tx=new THREE.CanvasTexture(cv);tx.colorSpace=THREE.SRGBColorSpace;
+  const haloMat=new THREE.MeshBasicMaterial({map:tx,toneMapped:false,side:THREE.DoubleSide,color:0xffffff});dallasEvent.haloMat=haloMat;
+  const halo=new THREE.Group();halo.position.set(st.center.x,st.city.py+st.bowl.pitchY+20.8,st.center.z);halo.rotation.y=st.rot;scene.add(halo);
+  for(const rz of[0,Math.PI/2,Math.PI,Math.PI*1.5]){
+    const panel=new THREE.Mesh(new THREE.PlaneGeometry(17.5,4.9),haloMat);panel.rotation.y=rz;panel.position.set(Math.sin(rz)*7.4,0,Math.cos(rz)*7.4);halo.add(panel);
+  }
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(10.4,.22,8,48),new THREE.MeshBasicMaterial({color:0x7fd8ff,toneMapped:false}));ring.rotation.x=Math.PI/2;halo.add(ring);
+  dallasEvent.halo=halo;
+
+  /* A physical pitch-side marker; the live prompt remains only “E Power Play”. */
+  const signTex=textTex('POWER PLAY  •  FIVE SHOTS','#ffffff','#0b1830','900 54px "Segoe UI",sans-serif',1024,128);
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(9.8,1.65),new THREE.MeshBasicMaterial({map:signTex,toneMapped:false}));
+  const sw=[0,0];fromStadLocal(st,13.2,-6.7,sw);sign.position.set(sw[0],st.city.py+st.bowl.pitchY+1.5,sw[1]);sign.rotation.y=st.rot+Math.PI/2;scene.add(sign);
+}
+
+/* Pass 23 — Miami Tropical Festival: sunset canopy and Neon Crossbar. */
+const miamiFestival={lights:[],targets:[],edgeMats:[],savedDayT:null,active:false,t:0,pulse:0};
+{
+  const st=stadiums.mia,targetBase=new THREE.Vector3(st.center.x,st.city.py+st.bowl.pitchY+1.4,st.center.z);
+  const colors=[0x35e0d2,0xff6f91,0xffd27a,0x9b7bff];
+  const localLights=[[-62,34,-45],[-62,34,45],[62,34,-45],[62,34,45]];
+  for(let i=0;i<localLights.length;i++){
+    const p=localLights[i],v=new THREE.Vector3(p[0],p[1],p[2]).applyAxisAngle(Y,st.rot);
+    const target=new THREE.Object3D();target.position.copy(targetBase);scene.add(target);
+    const L=new THREE.SpotLight(colors[i],0,220,Math.PI*.2,.62,1.05);
+    L.position.set(st.center.x+v.x,st.city.py+st.bowl.pitchY+v.y,st.center.z+v.z);L.target=target;scene.add(L);
+    miamiFestival.lights.push(L);miamiFestival.targets.push(target);
+  }
+
+  /* Palm-lined sunset promenade with low light shells instead of UI arrows. */
+  const ent=st.entrance,dir=new THREE.Vector3().subVectors(st.center,ent);dir.y=0;dir.normalize();
+  const side=new THREE.Vector3(-dir.z,0,dir.x),gatePos=ent.clone().addScaledVector(dir,-7),yaw=Math.atan2(dir.x,dir.z);
+  const gate=new THREE.Group();gate.position.copy(gatePos);gate.rotation.y=yaw;scene.add(gate);
+  const B=new Batch(),E=new Batch();
+  for(const x of[-8,8]){B.add(PRIM.cyl,0xf4eee2,x,4.6,0,0,.7,9.2,.7);E.add(PRIM.ring,x<0?0x35e0d2:0xff6f91,x,8.9,0,0,1.5,.22,1.5);}
+  B.add(PRIM.box,0xf3eee4,0,9.2,0,0,17,.65,1);E.add(PRIM.box,0xffd27a,0,8.75,-.55,0,14.5,.12,.12);
+  const bm=B.build(MAT.opaque,true),em=E.build(MAT.glow,false);if(bm)gate.add(bm);if(em)gate.add(em);
+  const gt=textTex('MIAMI  •  TROPICAL NIGHT','#ffffff','#11344b','900 58px "Segoe UI",sans-serif',1280,144);
+  const gs=new THREE.Mesh(new THREE.PlaneGeometry(14.8,1.7),new THREE.MeshBasicMaterial({map:gt,toneMapped:false}));gs.position.set(0,9.15,-.57);gate.add(gs);
+  for(let i=0;i<11;i++){
+    const c=ent.clone().addScaledVector(dir,-15-i*6.4);
+    for(const s of[-1,1]){
+      const p=c.clone().addScaledVector(side,s*5.6);
+      const shell=new THREE.Mesh(new THREE.SphereGeometry(.28,10,7),new THREE.MeshBasicMaterial({color:s<0?0x35e0d2:0xff6f91,toneMapped:false}));
+      shell.position.set(p.x,st.city.py+.35,p.z);scene.add(shell);
+    }
+  }
+
+  /* Four luminous canopy ribbons form one restrained music visualizer. */
+  for(let i=0;i<4;i++){
+    const mat=new THREE.MeshBasicMaterial({color:colors[i],transparent:true,opacity:.42,toneMapped:false});miamiFestival.edgeMats.push(mat);
+    const strip=new THREE.Mesh(new THREE.BoxGeometry(i<2?88:.18,.16,i<2?.18:56),mat);
+    const local=i===0?[0,31.2,-28.6]:i===1?[0,31.2,28.6]:i===2?[-44.2,31.2,0]:[44.2,31.2,0];
+    const v=new THREE.Vector3(local[0],local[1],local[2]).applyAxisAngle(Y,st.rot);strip.position.set(st.center.x+v.x,st.city.py+v.y,st.center.z+v.z);strip.rotation.y=st.rot;scene.add(strip);
+  }
+  const signTex=textTex('NEON CROSSBAR','#ffffff','#12364c','900 58px "Segoe UI",sans-serif',1024,128);
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(9.2,1.55),new THREE.MeshBasicMaterial({map:signTex,toneMapped:false}));
+  const sw=[0,0];fromStadLocal(st,-4.8,13.7,sw);sign.position.set(sw[0],st.city.py+st.bowl.pitchY+1.48,sw[1]);sign.rotation.y=st.rot;scene.add(sign);
+}
+
 /* ============================================================
    THE PROMENADE: golden road on the ground, park fabric between lands
    ============================================================ */
@@ -3170,8 +3300,10 @@ function getContextAction(){
     if(pg){
       const mexFlag=player.insideId==='mex'&&pg.label==='penalty shootout';
       const nyFlag=player.insideId==='ny'&&pg.label==='penalty shootout';
-      return{id:'pitch_'+pg.label,key:'E',type:mexFlag?'Azteca match night':(nyFlag?'The Final':'Stadium game'),
-        title:mexFlag?'Take five penalties':(nyFlag?'Take the final five':niceAction(pg.label)),sub:'',kind:'pitch',pg};
+      const dalFlag=player.insideId==='dal'&&pg.label==='penalty shootout';
+      const miaFlag=player.insideId==='mia'&&pg.label==='crossbar challenge';
+      return{id:'pitch_'+pg.label,key:'E',type:mexFlag?'Azteca match night':(nyFlag?'The Final':(dalFlag?'Dallas event':'Stadium game')),
+        title:mexFlag?'Take five penalties':(nyFlag?'Take the final five':(dalFlag?'Power Play':(miaFlag?'Neon Crossbar':niceAction(pg.label)))),sub:'',kind:'pitch',pg};
     }
     const st=stadiums[player.insideId];
     if(st&&st.insideExitLocal){
@@ -3495,16 +3627,16 @@ function nearPenaltySpot(){
   return Math.abs(_lo[0]-18.2)<5&&Math.abs(_lo[1])<5;
 }
 function startShootout(id){
-  const st=stadiums[id],isFinal=id==='ny';
+  const st=stadiums[id],isFinal=id==='ny',isPower=id==='dal';
   const diff=isFinal?3:(st.city.ko==='SF'?2:(st.city.ko==='QF'?1:0));
   startChallenge({
-    title:isFinal?'FINAL PRESSURE':'PENALTY SHOOTOUT',
-    cue:'aim · hold Space · A / D curve · release to strike',
+    title:isFinal?'FINAL PRESSURE':(isPower?'POWER PLAY':'PENALTY SHOOTOUT'),
+    cue:isPower?'aim · hold Space · release inside the power window':'aim · hold Space · A / D curve · release to strike',
     rules:isFinal?`Five kicks beneath the championship lights.<br>Aim with the mouse. Hold SPACE to charge, release to shoot.<br>The keeper reads late, so placement and curve matter.`:
       `Five kicks at ${st.city.stadium}.<br>Aim with the mouse. Hold SPACE to charge, release to shoot.<br>Soft shots get saved; overcooked ones clear the bar.`,
     medals:'3 goals bronze &nbsp;·&nbsp; 4 silver &nbsp;·&nbsp; 5 gold, with a top corner',
     begin(){
-      pk.on=true;pk.st=st;pk.finalMode=isFinal;pk.diff=diff;pk.kick=0;pk.scored=0;pk.top=false;pk.results=[];pk.spin=0;pk.feedback='';
+      pk.on=true;pk.st=st;pk.finalMode=isFinal;pk.powerMode=isPower;pk.diff=diff;pk.kick=0;pk.scored=0;pk.top=false;pk.results=[];pk.spin=0;pk.feedback='';
       pk.state='aim';pk.charge=0;pk.t=0;
       pk.gy=st.city.py+st.bowl.pitchY+.34;
       const sp=pkW(st,15.2,0),gp=pkW(st,25,0);
@@ -3516,10 +3648,10 @@ function startShootout(id){
       keeper.g.position.copy(keeper.base);
       keeper.g.rotation.set(0,Math.atan2(sp.x-kp.x,sp.z-kp.z),0);
       keeper.g.visible=true;
-      $('shootHud').querySelector('.shootName').textContent=isFinal?'Final Pressure':'Penalty Shootout';
+      $('shootHud').querySelector('.shootName').textContent=isFinal?'Final Pressure':(isPower?'Power Play':'Penalty Shootout');
       if(isFinal){ball.material.emissive.setHex(0x2b1b03);ball.material.emissiveIntensity=.13;}
       $('pbar').classList.add('on');$('shootHud').classList.add('on');
-      updateShootHud();showShotFeedback(isFinal?'The final five':'Five kicks');
+      updateShootHud();showShotFeedback(isFinal?'The final five':(isPower?'Control the power':'Five kicks'));
     },
     tick(dt){pkTick(dt);},
     abort(){pkCleanup();},
@@ -3544,7 +3676,7 @@ function pkPlaceBall(){
   ball.position.set(bp.x,pk.gy+.36,bp.z);
 }
 function pkCleanup(){
-  pk.on=false;pk.finalMode=false;
+  pk.on=false;pk.finalMode=false;pk.powerMode=false;
   ball.material.emissive.setHex(0x000000);ball.material.emissiveIntensity=1;
   keeper.g.visible=false;keeper.g.rotation.z=0;keeper.aL.rotation.z=-.28;keeper.aR.rotation.z=.28;keeper.legL.rotation.z=0;keeper.legR.rotation.z=0;
   reticle.material.opacity=0;
@@ -3649,6 +3781,7 @@ function pkTick(dt){
       pk.resolved=true;pk.scored++;pk.results[pk.kick]='goal';if(pk.aimTop)pk.top=true;
       showShotFeedback(pk.finalMode?(pk.aimTop?'Final top corner':'Final goal'):(pk.aimTop?'Top corner':'Goal'));
       if(pk.finalMode)nyFinalGoalVolley(pk.scored);
+      if(pk.powerMode)dallasPowerPulse(pk.scored);
       updateShootHud();shakeT=Math.max(shakeT,pk.finalMode?.18:.12);
     }
     if(pk.ft>2.1){
@@ -3679,8 +3812,14 @@ function nyFinalGoalVolley(seed=1){
     if(hash2(i,seed*37)>.72)nyFinal.flashers[i].material.opacity=.9;
   }
 }
+function dallasPowerPulse(seed=1){
+  dallasEvent.pulse=1;
+  shakeT=Math.max(shakeT,.16);
+  const st=stadiums.dal,f=fireworks.find(x=>x.t<0);
+  if(f)f.fire(st.center.x+(seed%2?58:-58),st.city.py+78,st.center.z+(seed%2?-30:34),0x7fd8ff);
+}
 function pkFinish(){
-  const n=pk.scored,wasFinal=!!pk.finalMode;
+  const n=pk.scored,wasFinal=!!pk.finalMode,wasPower=!!pk.powerMode;
   const medal=n>=5&&pk.top?'gold':(n>=4?'silver':(n>=3?'bronze':null));
   const pts=medal==='gold'?400:medal==='silver'?200:medal==='bronze'?100:25;
   addPoints(pts);
@@ -3692,10 +3831,11 @@ function pkFinish(){
   if(medal==='gold'){
     audio&&audio.pitchRoar();goalBurst.fire(ball.position.x,pk.gy+4,ball.position.z);
     if(wasFinal){nyFinalGoalVolley(9);nyFinalGoalVolley(15);}
+    if(wasPower){dallasPowerPulse(9);dallasPowerPulse(15);}
   }
   pkCleanup();
   chResult(n+' / 5',
-    (wasFinal?'FINAL NIGHT · ':'')+(medal?medal.toUpperCase()+' medal':'no medal')+' · +'+pts+' points<br>best at this ground: '+Math.max(n,best)+' / 5',
+    (wasFinal?'FINAL NIGHT · ':(wasPower?'DALLAS POWER PLAY · ':''))+(medal?medal.toUpperCase()+' medal':'no medal')+' · +'+pts+' points<br>best at this ground: '+Math.max(n,best)+' / 5',
     pk.top?'top corner finish ✓':'');
 }
 /* ---------------- game: crossbar challenge ---------------- */
@@ -3705,13 +3845,13 @@ const cbBar=(()=>{
   m.visible=false;scene.add(m);return m;
 })();
 function startCrossbar(id){
-  const st=stadiums[id];
+  const st=stadiums[id],isNeon=id==='mia';
   startChallenge({
-    title:'CROSSBAR CHALLENGE',
+    title:isNeon?'NEON CROSSBAR':'CROSSBAR CHALLENGE',
     rules:`Five strikes at the bar of ${st.city.stadium}, stepping back each attempt.<br>Aim with the mouse, hold SPACE to charge, release to shoot.`,
     medals:'2 hits bronze &nbsp;·&nbsp; 3 silver &nbsp;·&nbsp; 4 gold &nbsp;·&nbsp; posts count half',
     begin(){
-      cb.on=true;cb.st=st;cb.i=0;cb.score=0;cb.pts=0;cb.t=0;
+      cb.on=true;cb.st=st;cb.neonMode=isNeon;cb.i=0;cb.score=0;cb.pts=0;cb.t=0;
       cb.gy=st.city.py+st.bowl.pitchY+.34;
       cb.D=[12,16,20,25,30];
       cbSetup();
@@ -3734,7 +3874,7 @@ function cbSetup(){
   player.yaw=Math.atan2(-(gp.x-sp.x),-(gp.z-sp.z));player.pitch=.08;syncLook();
   cb.state='aim';cb.charge=0;
 }
-function cbCleanup(){cb.on=false;reticle.material.opacity=0;cbBar.visible=false;$('pbar').classList.remove('on');}
+function cbCleanup(){cb.on=false;cb.neonMode=false;reticle.material.opacity=0;cbBar.visible=false;$('pbar').classList.remove('on');}
 function cbShoot(a){
   const st=cb.st,p=cb.charge;
   cb.state='flight';cb.ft=0;cb.resolved=null;
@@ -3797,10 +3937,11 @@ function cbWobble(){
   cbBar.scale.set(1,1,1);
   cbBar.visible=true;
   netWobs.push({mesh:cbBar,t:0});
+  if(cb.neonMode){miamiFestival.pulse=1;shakeT=Math.max(shakeT,.1);}
   setTimeout(()=>{cbBar.visible=false;},950);
 }
 function cbFinish(){
-  const n=cb.score;
+  const n=cb.score,wasNeon=!!cb.neonMode;
   const medal=n>=4?'gold':n>=3?'silver':n>=2?'bronze':null;
   const pts=cb.pts+(medal==='gold'?150:medal==='silver'?75:medal==='bronze'?40:10);
   addPoints(pts);
@@ -3809,9 +3950,9 @@ function cbFinish(){
   if(medal==='gold')addStar(id,'g');
   const bk='cb_'+id,best=save.d.bests[bk]||0;
   if(n>best){save.d.bests[bk]=n;save.w();}
-  if(medal==='gold')audio&&audio.pitchRoar();
+  if(medal==='gold'){audio&&audio.pitchRoar();if(wasNeon)miamiFestival.pulse=1.4;}
   cbCleanup();
-  chResult(n+' hits',(medal?medal.toUpperCase()+' medal':'no medal')+' · +'+pts+' points<br>best here: '+Math.max(n,best),'');
+  chResult(n+' hits',(wasNeon?'MIAMI NEON CROSSBAR · ':'')+(medal?medal.toUpperCase()+' medal':'no medal')+' · +'+pts+' points<br>best here: '+Math.max(n,best),'');
 }
 /* ---------------- game: dribble slalom ---------------- */
 const sl={on:false,objs:[]};
@@ -5208,6 +5349,16 @@ function enterStadium(id){
       fromStadLocal(st,0,st.bowl.rz0+3.4,_wo);
       player.pos.set(_wo[0],st.city.py+st.bowl.pitchY+.35+CFG.eye,_wo[1]);
       const ctr=pkW(st,0,0);player.yaw=Math.atan2(-(ctr.x-player.pos.x),-(ctr.z-player.pos.z));player.pitch=.016;
+    }else if(id==='dal'){
+      dallasEvent.savedDayT=dayT;dayT=.86;dallasEvent.active=true;document.body.classList.add('dallas-event');
+      fromStadLocal(st,0,st.bowl.rz0+3.3,_wo);
+      player.pos.set(_wo[0],st.city.py+st.bowl.pitchY+.35+CFG.eye,_wo[1]);
+      const ctr=pkW(st,0,0);player.yaw=Math.atan2(-(ctr.x-player.pos.x),-(ctr.z-player.pos.z));player.pitch=.02;
+    }else if(id==='mia'){
+      miamiFestival.savedDayT=dayT;dayT=.79;miamiFestival.active=true;document.body.classList.add('miami-festival');
+      fromStadLocal(st,0,st.bowl.rz0+3.2,_wo);
+      player.pos.set(_wo[0],st.city.py+st.bowl.pitchY+.35+CFG.eye,_wo[1]);
+      const ctr=pkW(st,0,0);player.yaw=Math.atan2(-(ctr.x-player.pos.x),-(ctr.z-player.pos.z));player.pitch=.02;
     }else player.pos.set(st.center.x-6,st.city.py+st.bowl.pitchY+.35+CFG.eye,st.center.z);
     player.vel.set(0,0,0);player.vy=0;
     syncLook();
@@ -5216,7 +5367,9 @@ function enterStadium(id){
     if(!tips.stad)setTimeout(()=>tipOnce('stad','read the pitch signs · gold CONCOURSE tunnel returns to the park'),1200);
     showBanner(st.city.stadium,id==='mex'?'MATCH NIGHT · WALKOUT TO THE GOLD RING':
       (id==='la'?'PREMIERE NIGHT · FOLLOW THE CYAN FLOOR LIGHTS':
-      (id==='ny'?'THE FINAL · FOLLOW THE GOLD RUNWAY TO FINAL PRESSURE':'four pitch games · follow the floor decals')));
+      (id==='ny'?'THE FINAL · FOLLOW THE GOLD RUNWAY TO FINAL PRESSURE':
+      (id==='dal'?'DALLAS EVENT NIGHT · FOLLOW THE BLUE STUDS TO POWER PLAY':
+      (id==='mia'?'TROPICAL NIGHT · FOLLOW THE AQUA AND CORAL LIGHTS TO NEON CROSSBAR':'four pitch games · follow the floor decals')))));
     audio&&audio.enterRoar();
     updateHud();
   });
@@ -5235,6 +5388,14 @@ function exitStadium(){
     if(player.insideId==='ny'){
       if(nyFinal.savedDayT!==null)dayT=nyFinal.savedDayT;
       nyFinal.savedDayT=null;nyFinal.active=false;document.body.classList.remove('ny-final');
+    }
+    if(player.insideId==='dal'){
+      if(dallasEvent.savedDayT!==null)dayT=dallasEvent.savedDayT;
+      dallasEvent.savedDayT=null;dallasEvent.active=false;document.body.classList.remove('dallas-event');
+    }
+    if(player.insideId==='mia'){
+      if(miamiFestival.savedDayT!==null)dayT=miamiFestival.savedDayT;
+      miamiFestival.savedDayT=null;miamiFestival.active=false;document.body.classList.remove('miami-festival');
     }
     mode='ground';player.insideId=null;
     const dir=new THREE.Vector3().subVectors(st.entrance,st.center);dir.y=0;dir.normalize();
@@ -5590,6 +5751,8 @@ function updateSky(){
   if(aztecaMatch.active)renderer.toneMappingExposure*=1.12;
   if(laPremiere.active)renderer.toneMappingExposure*=1.08;
   if(nyFinal.active)renderer.toneMappingExposure*=1.13;
+  if(dallasEvent.active)renderer.toneMappingExposure*=1.1;
+  if(miamiFestival.active)renderer.toneMappingExposure*=1.12;
   const elev=Math.sin((dayT-.25)*TAU);
   const az=dayT*TAU+.9;
   const ch=Math.sqrt(Math.max(.06,1-elev*elev));
@@ -5684,6 +5847,26 @@ function updateSky(){
     if(nyFinal.active&&hash2(i,Math.floor(nyFinal.t*13))>.987)f.material.opacity=.68;
   }
   if(nyFinal.active){stadiumLight.intensity=Math.max(stadiumLight.intensity,16);stadiumLight.color.setHex(0xe8f2ff);}
+  const dalOn=dallasEvent.active?1:0;dallasEvent.t+=.014;
+  for(let i=0;i<dallasEvent.lights.length;i++){
+    const L=dallasEvent.lights[i],tar=dallasEvent.targets[i],a=dallasEvent.t*(.34+i*.018)+i*TAU/dallasEvent.lights.length;
+    tar.position.set(stadiums.dal.center.x+Math.cos(a)*18,stadiums.dal.city.py+stadiums.dal.bowl.pitchY+1.5,
+      stadiums.dal.center.z+Math.sin(a*1.14)*10);
+    L.intensity+=(dalOn*(i<4?16:11)-L.intensity)*.1;
+  }
+  dallasEvent.pulse*=.9;
+  if(dallasEvent.haloMat)dallasEvent.haloMat.color.setRGB(1,1,1).lerp(new THREE.Color(0x7fd8ff),dallasEvent.pulse*.55);
+  if(dallasEvent.halo)dallasEvent.halo.rotation.y=stadiums.dal.rot+Math.sin(dallasEvent.t*.2)*.025;
+  if(dallasEvent.active){stadiumLight.intensity=Math.max(stadiumLight.intensity,15);stadiumLight.color.setHex(0xdbeeff);}
+  const miaOn=miamiFestival.active?1:0;miamiFestival.t+=.016;
+  for(let i=0;i<miamiFestival.lights.length;i++){
+    const L=miamiFestival.lights[i],tar=miamiFestival.targets[i],a=miamiFestival.t*(.52+i*.025)+i*TAU/4;
+    tar.position.set(stadiums.mia.center.x+Math.cos(a)*16,stadiums.mia.city.py+stadiums.mia.bowl.pitchY+1.8,
+      stadiums.mia.center.z+Math.sin(a*1.22)*10);L.intensity+=(miaOn*13-L.intensity)*.1;
+  }
+  miamiFestival.pulse*=.91;
+  for(let i=0;i<miamiFestival.edgeMats.length;i++)miamiFestival.edgeMats[i].opacity=(miamiFestival.active ? .45 : .08)+miamiFestival.pulse*.38+Math.sin(miamiFestival.t*2.2+i)*.06*miaOn;
+  if(miamiFestival.active){stadiumLight.intensity=Math.max(stadiumLight.intensity,13);stadiumLight.color.setHex(0xbdfcff);}
 }
 
 /* ============================================================
