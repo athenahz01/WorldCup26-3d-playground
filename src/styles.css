@@ -1,0 +1,209 @@
+:root{
+    --gold:#e8b84b; --gold-hi:#ffd97a; --ink:#0c1430; --ink2:#101a3d; --paper:#f4ead2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0c1430;font-family:"Segoe UI",system-ui,Helvetica,Arial,sans-serif;color:#eef;user-select:none;-webkit-user-select:none}
+  #gl{position:fixed;inset:0;display:block}
+  .vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(6,10,26,.42) 100%);z-index:3}
+  #fade{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .6s ease;z-index:9}
+
+  /* ---------- title screen ---------- */
+  #title{position:fixed;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    background:radial-gradient(ellipse at 50% 120%,rgba(20,32,80,.55),rgba(5,8,20,.78) 70%);transition:opacity 1.2s ease}
+  #title.gone{opacity:0;pointer-events:none}
+  #title .kicker{letter-spacing:.55em;font-size:12px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-indent:.55em}
+  #title h1{font-size:clamp(44px,8vw,96px);font-weight:900;letter-spacing:.12em;line-height:.95;text-indent:.12em;
+    background:linear-gradient(180deg,#fff 20%,var(--gold-hi) 55%,#c98f2c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 4px 24px rgba(232,184,75,.35))}
+  #title .sub{margin-top:14px;font-size:clamp(13px,1.6vw,17px);color:#cfd8ff;letter-spacing:.18em;text-transform:uppercase;text-indent:.18em}
+  #legend{margin-top:34px;display:grid;grid-template-columns:auto auto;gap:7px 26px;font-size:13px;color:#aab6e6;text-align:left}
+  #legend b{display:inline-block;min-width:86px;color:#fff;font-weight:600}
+  #legend kbd{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-family:inherit;font-size:12px;color:#fff}
+  #begin{margin-top:36px;font-size:16px;letter-spacing:.32em;text-indent:.32em;text-transform:uppercase;font-weight:700;color:#1a1405;
+    background:linear-gradient(180deg,var(--gold-hi),#cf9a30);border:none;border-radius:999px;padding:16px 54px;cursor:pointer;
+    box-shadow:0 0 0 1px rgba(255,220,140,.6) inset,0 8px 30px rgba(232,184,75,.35);transition:transform .15s ease,box-shadow .15s ease}
+  #begin:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,235,180,.9) inset,0 12px 40px rgba(232,184,75,.55)}
+  #begin:disabled{opacity:.4;cursor:wait}
+  #title .foot{position:absolute;bottom:22px;width:100%;font-size:11px;color:#66719e;letter-spacing:.08em}
+
+  /* ---------- HUD ---------- */
+  #banner{position:fixed;top:38px;left:50%;transform:translate(-50%,-12px);z-index:5;text-align:center;opacity:0;visibility:hidden;transition:opacity .7s ease,transform .7s ease;pointer-events:none}
+  #banner.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  #hint:empty,#banner .b1:empty,#banner .b2:empty{display:none}
+  #banner .b1{font-size:clamp(20px,3vw,34px);font-weight:800;letter-spacing:.3em;text-indent:.3em;text-transform:uppercase;color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.6)}
+  #banner .b2{margin-top:4px;font-size:12px;letter-spacing:.34em;text-indent:.34em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 10px rgba(0,0,0,.7)}
+  #banner .rule{margin:8px auto 0;width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  #hud{position:fixed;left:22px;bottom:20px;z-index:5;font-size:12.5px;color:#dfe6ff;letter-spacing:.06em;text-shadow:0 1px 6px rgba(0,0,0,.8);pointer-events:none;line-height:1.9}
+  #hud .mode{color:var(--gold);font-weight:700;letter-spacing:.22em;text-transform:uppercase;font-size:11px}
+  #hud kbd{background:rgba(10,14,32,.55);border:1px solid rgba(255,255,255,.25);border-radius:4px;padding:0 6px;font-family:inherit;font-size:11px}
+  #speed{position:fixed;right:22px;bottom:20px;z-index:5;font-size:12px;color:#aab6e6;letter-spacing:.14em;text-shadow:0 1px 6px rgba(0,0,0,.8);pointer-events:none;text-align:right;line-height:1.8}
+  #hint{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:5;font-size:14px;letter-spacing:.24em;text-indent:.24em;text-transform:uppercase;color:#fff;
+    text-shadow:0 0 14px rgba(232,184,75,.9),0 2px 8px rgba(0,0,0,.8);opacity:0;transition:opacity .3s;pointer-events:none}
+  #hint.on{opacity:1}
+  #lockHint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;font-size:15px;letter-spacing:.3em;text-indent:.3em;text-transform:uppercase;color:#fff;
+    background:rgba(8,12,28,.55);border:1px solid rgba(232,184,75,.5);border-radius:999px;padding:12px 30px;
+    text-shadow:0 2px 8px rgba(0,0,0,.8);opacity:0;transition:opacity .4s;pointer-events:none}
+  #lockHint.on{opacity:1}
+  /* Pass 19: challenges never cover the world. Results live in a slim lower-third ribbon. */
+  #card{position:fixed;left:50%;bottom:26px;top:auto;transform:translate(-50%,12px);z-index:18;display:none;
+    width:min(760px,calc(100vw - 40px));min-width:0;max-width:none;
+    background:linear-gradient(90deg,rgba(5,10,24,.22),rgba(5,10,24,.82) 18%,rgba(5,10,24,.82) 82%,rgba(5,10,24,.22));
+    border-top:1px solid rgba(255,221,142,.38);border-bottom:1px solid rgba(255,255,255,.08);border-radius:0;
+    padding:11px 16px 10px;text-align:left;box-shadow:0 15px 45px rgba(0,0,0,.28);backdrop-filter:blur(12px)}
+  #card.on{display:grid;grid-template-columns:minmax(120px,.72fr) minmax(210px,1.65fr) auto;gap:15px;align-items:center;animation:resultRibbonIn .26s ease both}
+  @keyframes resultRibbonIn{from{opacity:0;transform:translate(-50%,18px)}to{opacity:1;transform:translate(-50%,0)}}
+  #card h3{font-size:10px;letter-spacing:.24em;text-indent:0;text-transform:uppercase;color:#e8b84b;margin:0}
+  #card .body{font-size:11px;line-height:1.45;color:#e5eaff}
+  #card .medals{margin:2px 0 0;font-size:9px;color:#d8c897;letter-spacing:.08em;grid-column:2}
+  #card .keys{display:none}
+  #card .big{display:inline;font-size:22px;font-weight:850;color:#fff;margin:0 8px 0 0}
+  #pbar{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);z-index:16;width:min(310px,42vw);height:6px;
+    background:rgba(4,9,22,.64);border:1px solid rgba(255,255,255,.2);border-radius:999px;display:none;overflow:hidden;
+    box-shadow:0 4px 18px rgba(0,0,0,.32)}
+  #pbar.on{display:block}
+  #pbar div{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#4aa56c,#f2c744 66%,#ef695f);box-shadow:0 0 10px rgba(255,217,122,.5)}
+
+  /* Azteca flagship challenge HUD: scoreboard, not an instruction card. */
+  #shootHud{position:fixed;left:50%;top:22px;z-index:16;display:flex;align-items:center;gap:14px;
+    transform:translate(-50%,-8px);opacity:0;visibility:hidden;pointer-events:none;
+    color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.9);transition:opacity .2s ease,transform .2s ease,visibility .2s}
+  #shootHud.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  #shootHud .shootName{font-size:8px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:#e8b84b}
+  #shootHud .shootScore{font-size:12px;font-weight:760;letter-spacing:.09em;white-space:nowrap}
+  #shootHud .shootPips{display:flex;gap:5px}
+  #shootHud .shootPips i{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(4,9,22,.45);box-shadow:0 2px 7px rgba(0,0,0,.42)}
+  #shootHud .shootPips i.goal{background:#ffd97a;border-color:#fff2c1;box-shadow:0 0 10px rgba(255,217,122,.85)}
+  #shootHud .shootPips i.miss{background:#5b6475;border-color:#8f98a9}
+  #shootHud .shootCurve{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#aebbea;white-space:nowrap}
+  #shootHud .shootCurve b{color:#fff;font-size:10px}
+  #shotFeedback{position:fixed;left:50%;top:118px;z-index:15;transform:translate(-50%,-6px);opacity:0;visibility:hidden;
+    font-size:13px;font-weight:900;letter-spacing:.34em;text-indent:.34em;text-transform:uppercase;color:#fff;
+    text-shadow:0 0 20px rgba(255,217,122,.65),0 3px 12px rgba(0,0,0,.9);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+  #shotFeedback.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  body.azteca-match .vig{background:radial-gradient(ellipse at 50% 48%,transparent 32%,rgba(3,7,18,.55) 100%)}
+  body.azteca-match #cinema{opacity:.1}
+
+  /* Pass 20: Los Angeles uses a broadcast-clean HUD, never a blocking instruction panel. */
+  #arcadeHud{position:fixed;left:50%;top:22px;z-index:16;display:flex;align-items:center;gap:15px;
+    transform:translate(-50%,-8px);opacity:0;visibility:hidden;pointer-events:none;white-space:nowrap;
+    color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.92);transition:opacity .18s ease,transform .18s ease,visibility .18s}
+  #arcadeHud.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  #arcadeHud .arcadeName{font-size:8px;font-weight:850;letter-spacing:.29em;text-transform:uppercase;color:#7fd8ff}
+  #arcadeHud .arcadeTime{font-size:17px;font-weight:900;letter-spacing:.08em;color:#fff}
+  #arcadeHud .arcadeScore{font-size:11px;font-weight:780;letter-spacing:.1em;color:#f5f7ff}
+  #arcadeHud .arcadeCombo{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#aebbea}
+  #arcadeHud .arcadeCombo b{font-size:12px;color:#ffd97a}
+  #arcadeFeedback{position:fixed;left:50%;top:91px;z-index:16;transform:translate(-50%,-5px);opacity:0;visibility:hidden;
+    font-size:11px;font-weight:900;letter-spacing:.3em;text-indent:.3em;text-transform:uppercase;color:#fff;pointer-events:none;
+    text-shadow:0 0 18px rgba(127,216,255,.8),0 3px 12px rgba(0,0,0,.9);transition:opacity .14s ease,transform .14s ease}
+  #arcadeFeedback.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  #arcadeFeedback.bonus{color:#ffe38d;text-shadow:0 0 20px rgba(255,217,122,.95),0 3px 12px rgba(0,0,0,.9)}
+  body.la-premiere .vig{background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(3,8,21,.51) 100%)}
+  body.la-premiere #cinema{opacity:.08;background-image:radial-gradient(circle at 52% 38%,rgba(127,216,255,.08),transparent 46%),repeating-radial-gradient(circle at 17% 23%,rgba(255,255,255,.045) 0 1px,transparent 1px 4px)}
+
+  /* Pass 21: MetLife Final Night stays cinematic and diegetic. No modal instructions. */
+  body.ny-final .vig{background:
+    radial-gradient(ellipse at 50% 47%,transparent 29%,rgba(2,6,18,.62) 100%),
+    linear-gradient(180deg,rgba(5,12,35,.08),rgba(3,7,21,.18))}
+  body.ny-final #cinema{opacity:.1;background-image:
+    radial-gradient(circle at 50% 38%,rgba(255,215,112,.07),transparent 43%),
+    repeating-radial-gradient(circle at 17% 23%,rgba(255,255,255,.04) 0 1px,transparent 1px 4px)}
+  body.ny-final #shootHud .shootName{color:#ffd97a;text-shadow:0 0 15px rgba(255,217,122,.42)}
+  body.ny-final #shootHud .shootPips i.goal{background:#ffd97a;border-color:#fff5cf;box-shadow:0 0 13px rgba(255,217,122,.95)}
+  body.ny-final #shotFeedback{color:#fff3c4;text-shadow:0 0 24px rgba(255,217,122,.9),0 3px 12px rgba(0,0,0,.94)}
+  body.ny-final #pbar div{background:linear-gradient(90deg,#426aa8,#ffd97a 68%,#fff0b0)}
+  @media(max-width:760px){#shootHud{top:14px;gap:8px}.shootCurve{display:none}#card.on{grid-template-columns:1fr auto}.cardActions{grid-column:2;grid-row:1/3}}
+
+  #resetBtn{margin-top:14px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8a96c8;
+    background:none;border:1px solid rgba(138,150,200,.4);border-radius:999px;padding:7px 18px;cursor:pointer}
+  #resetBtn:hover{color:#fff;border-color:#fff}
+  body.photo #gl{filter:saturate(1.18) contrast(1.04)}
+  body.photo .vig{background:radial-gradient(ellipse at center,transparent 42%,rgba(6,10,26,.6) 100%)}
+
+  /* ---------- map ---------- */
+  #map{position:fixed;inset:0;z-index:7;display:none;align-items:center;justify-content:center;background:rgba(5,8,20,.72);backdrop-filter:blur(6px)}
+  #map.on{display:flex}
+  #mapPanel{position:relative;background:linear-gradient(180deg,#111b40,#0b1330);border:1px solid rgba(232,184,75,.4);border-radius:14px;padding:26px 26px 18px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+  #mapPanel h2{font-size:13px;letter-spacing:.4em;text-indent:.4em;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:12px}
+  #mapCanvas{display:block;border-radius:8px;cursor:crosshair}
+  #mapPanel .mfoot{margin-top:10px;text-align:center;font-size:11px;color:#8a96c8;letter-spacing:.1em}
+  #err{position:fixed;left:12px;top:12px;z-index:99;display:none;max-width:480px;background:rgba(120,20,20,.92);color:#fff;font:12px/1.5 monospace;padding:10px 14px;border-radius:8px;white-space:pre-wrap}
+
+
+  /* ---------- Pass 16: attraction-grade UX ---------- */
+  #cinema{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:.16;mix-blend-mode:soft-light;
+    background-image:radial-gradient(circle at 50% 35%,rgba(255,255,255,.08),transparent 48%),
+      repeating-radial-gradient(circle at 17% 23%,rgba(255,255,255,.06) 0 1px,transparent 1px 4px);
+    background-size:100% 100%,5px 5px}
+  #mission{position:fixed;left:22px;top:22px;z-index:12;width:min(290px,calc(100vw - 44px));display:none;
+    background:none;border:0;border-radius:0;padding:0 0 8px;box-shadow:none;backdrop-filter:none;pointer-events:none}
+  #mission.on{display:block;animation:missionIn .38s ease both}
+  @keyframes missionIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  #mission .eyebrow{font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  #mission .missionTitle{font-size:14px;font-weight:750;letter-spacing:.02em;color:#fff}
+  #mission .missionBody{font-size:10px;line-height:1.45;color:#b9c5eb;margin-top:3px;padding-right:18px;text-shadow:0 2px 10px rgba(0,0,0,.95)}
+  #mission .missionTrack{height:2px;background:rgba(255,255,255,.13);border-radius:4px;margin-top:7px;overflow:hidden}
+  #mission .missionFill{height:100%;width:0;background:linear-gradient(90deg,#e8b84b,#ffe39a);transition:width .45s ease}
+  #mission .missionCount{position:absolute;right:0;top:0;font-size:8px;letter-spacing:.18em;color:#7f8dbf}
+  #missionClose{display:none}
+  #missionClose:hover{color:#fff}
+
+  /* The old oversized context card is intentionally retired. The node remains
+     inert for backwards-compatible debug hooks; gameplay now uses a quiet cue. */
+  #actionPrompt{display:none!important}
+  #contextHint{position:fixed;left:50%;bottom:42px;z-index:12;display:flex;align-items:center;gap:9px;
+    transform:translate(-50%,8px);opacity:0;visibility:hidden;pointer-events:none;white-space:nowrap;
+    color:#fff;font-size:12px;font-weight:720;letter-spacing:.035em;text-shadow:0 2px 12px rgba(0,0,0,.92),0 0 16px rgba(232,184,75,.18);
+    transition:opacity .16s ease,transform .16s ease,visibility .16s}
+  #contextHint.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  #contextHint .contextKey{display:inline-grid;place-items:center;min-width:28px;height:28px;padding:0 8px;border-radius:7px;
+    border:1px solid rgba(255,225,150,.7);background:rgba(8,13,29,.58);box-shadow:0 5px 18px rgba(0,0,0,.3);
+    color:#ffd76b;font-size:12px;font-weight:900;letter-spacing:0}
+  #contextHint .contextType{color:#e8b84b;font-size:8px;letter-spacing:.24em;text-transform:uppercase;margin-right:1px}
+  #contextHint .contextTitle{color:#fff}
+  #arcadeCrosshair{position:fixed;left:50%;top:50%;z-index:14;width:28px;height:28px;transform:translate(-50%,-50%) scale(.8);
+    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease,transform .16s ease}
+  #arcadeCrosshair.on{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+  #arcadeCrosshair:before,#arcadeCrosshair:after{content:"";position:absolute;left:50%;top:50%;background:rgba(255,255,255,.92);
+    box-shadow:0 0 9px rgba(127,216,255,.8)}
+  #arcadeCrosshair:before{width:22px;height:1px;transform:translate(-50%,-50%)}
+  #arcadeCrosshair:after{width:1px;height:22px;transform:translate(-50%,-50%)}
+  #arcadeCrosshair i{position:absolute;inset:7px;border:1px solid #ffd97a;border-radius:50%;box-shadow:0 0 10px rgba(255,217,122,.45)}
+  #arcadeCrosshair.hit{animation:arcHit .16s ease}
+  @keyframes arcHit{50%{transform:translate(-50%,-50%) scale(1.35);filter:brightness(1.8)}}
+  @media(max-width:760px){#contextHint{bottom:24px;max-width:calc(100vw - 28px);overflow:hidden;text-overflow:ellipsis}}
+
+  #guideBtn{position:fixed;right:20px;top:20px;z-index:12;display:none;border:1px solid rgba(255,255,255,.17);border-radius:999px;
+    background:rgba(8,14,34,.62);color:#dce4ff;padding:8px 13px;font:700 9px/1 "Segoe UI",system-ui,sans-serif;letter-spacing:.18em;
+    text-transform:uppercase;backdrop-filter:blur(9px);cursor:pointer}
+  #guideBtn.on{display:block}#guideBtn:hover{border-color:rgba(255,217,122,.65);color:#fff}
+  #parkGuide{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:24px;
+    background:rgba(3,7,18,.78);backdrop-filter:blur(14px)}
+  #parkGuide.on{display:flex}
+  #guidePanel{position:relative;width:min(980px,96vw);max-height:min(760px,92vh);overflow:auto;border-radius:20px;
+    background:linear-gradient(145deg,#111c42,#081126 76%);border:1px solid rgba(255,217,122,.28);box-shadow:0 36px 110px rgba(0,0,0,.65);padding:30px}
+  #guidePanel .guideKicker{font-size:10px;color:var(--gold);letter-spacing:.36em;text-transform:uppercase}
+  #guidePanel h2{font-size:clamp(26px,4vw,44px);letter-spacing:.04em;margin:7px 0 5px;color:#fff}
+  #guidePanel .guideLead{font-size:13px;color:#aebbea;line-height:1.65;max-width:720px}
+  #guideClose{position:absolute;right:18px;top:18px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.17);
+    background:rgba(255,255,255,.05);color:#fff;font-size:20px;cursor:pointer}
+  .guideStats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:22px 0}
+  .guideStat{padding:13px 14px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}
+  .guideStat b{display:block;font-size:20px;color:#fff}.guideStat span{font-size:9px;color:#8795c5;letter-spacing:.16em;text-transform:uppercase}
+  .guideGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .guideCard{min-height:128px;padding:15px;border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.025));
+    border:1px solid rgba(255,255,255,.09)}
+  .guideCard .tag{font-size:8px;color:var(--gold);letter-spacing:.22em;text-transform:uppercase}.guideCard h3{font-size:14px;margin:6px 0;color:#fff}
+  .guideCard p{font-size:11px;line-height:1.5;color:#9da9d4}.guideCard kbd{display:inline-block;margin-top:10px;background:#f4cf75;color:#161103;
+    border-radius:5px;padding:3px 7px;font:800 9px/1.2 inherit}
+  .guideFooter{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);
+    font-size:10px;color:#7f8dbd;line-height:1.5}.guideFooter strong{color:#fff}
+
+  #card .cardActions{display:flex;justify-content:flex-end;gap:7px;margin:0;grid-column:3;grid-row:1/3}
+  #card .cardActions button{border-radius:999px;padding:7px 12px;font:750 8px/1 inherit;letter-spacing:.13em;text-transform:uppercase;cursor:pointer}
+  #cardPrimary{border:1px solid #ffe39a;background:linear-gradient(180deg,#ffe29a,#dca635);color:#1b1404}
+  #cardSecondary{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);color:#b7c2e8}
+  #cardPrimary:hover{transform:translateY(-1px)}#cardSecondary:hover{color:#fff;border-color:rgba(255,255,255,.5)}
+
+  @media(max-width:760px){#mission{left:12px;top:12px}.guideStats{grid-template-columns:repeat(2,1fr)}.guideGrid{grid-template-columns:1fr}
+    #guidePanel{padding:23px 18px}.guideFooter{display:block}.guideFooter>*{display:block;margin-top:8px}}
