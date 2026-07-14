@@ -88,3 +88,47 @@ This begins Phase 2 and is the fifth city-level vertical slice.
 
 - Vite production build passes.
 - The four completed flagship slices and all shared traversal, game, save, and reward systems remain connected.
+
+## Interface correction — result ribbon removed
+
+- Removed the full-width Retry / Explore result ribbon after owner review.
+- Challenges now return directly to exploration and report the score through the existing short banner and compact feedback line.
+- Removed the dormant result-card HTML, CSS, and keyboard state rather than merely hiding it.
+
+## Pass 24 — Seattle Rain City
+
+### City completed
+
+**Seattle — Lumen Field**
+
+This is the sixth city-level vertical slice and the second Phase 2 destination.
+
+### Visual refinement
+
+- Strengthened Lumen Field's twin roof silhouette with exposed steel rhythm, glass end concourses, supporter-color structural light, and brighter roof crowns.
+- Added a dedicated wet broadcast pitch with stronger clearcoat and tighter reflected light.
+- Added four coordinated cool-white and supporter-green spotlights with a restrained overcast exposure state.
+- Added a steel arrival gate and reflective blue/green pavement strips that lead to the entrance without floating directions.
+- Existing localized rain now works with the authored wet materials rather than reading as an isolated particle effect.
+
+### Interaction refinement
+
+- Seattle's dribble event is now **Rain Run**.
+- The nearby prompt is only `E Rain Run`, backed by a physical pitch-side sign.
+- Each cleared gate pulses the wet approach lighting; gold triggers the stronger supporter response while retaining shared medals, stars, points, best times, and saves.
+- Entry and exit apply and restore the Rain City presentation state.
+
+### Technical checks
+
+- Production build passes after deleting the result-card system.
+- Existing city slices, traversal, coaster, shared games, rewards, and saves remain connected.
+
+## Grand Circuit pacing and route correction
+
+- Reduced global light-bar output, bloom, wayfinding-beam opacity, ribbon boost, glow sprites, and Miami canopy intensity so luminous elements guide without washing out architecture.
+- Removed every roof-flyover profile: all sixteen Grand Circuit city segments now enter and cross the stadium bowl.
+- Re-authored Guadalajara, Mexico City, Monterrey, and Kansas City on safer stadium axes to avoid landmarks and plaza objects while retaining interior passes.
+- Replaced random connector bends with collider-aware route selection.
+- Lowered ordinary connector cruise height from a 126-unit minimum to 74, reduced terrain clearance padding from 58 to 26, shortened lift runout, reduced lateral wandering, and nearly removed randomized connector height.
+- Increased chain-lift regulation from 36 to 52 units per second, doubled starting speed, and raised minimum ride speed from 5 to 9.
+- Runtime track audit: 16/16 bowl passes, zero corridor misses, zero collider contacts, zero roof-overflight intrusions, and zero inverted-frame samples.

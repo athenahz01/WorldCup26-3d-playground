@@ -795,6 +795,12 @@ const miamiPitchMat=sofiPitchMat.clone();
 miamiPitchMat.color=new THREE.Color(0xe8fff2);
 miamiPitchMat.roughness=.78;
 miamiPitchMat.envMapIntensity=.36;
+const seattlePitchMat=metlifePitchMat.clone();
+seattlePitchMat.color=new THREE.Color(0xddeee5);
+seattlePitchMat.roughness=.58;
+seattlePitchMat.clearcoat=.12;
+seattlePitchMat.clearcoatRoughness=.48;
+seattlePitchMat.envMapIntensity=.5;
 
 /* ---------------- plaque texture ---------------- */
 function makePlaqueTex(city){
@@ -993,6 +999,14 @@ sea(ctx){
   }
   S.O.add(PRIM.box,0x8e969e,-80,24,0,0,7,48,7);  /* north tower */
   S.E.add(PRIM.box,0x9fd8ff,-80,45,0,0,7.6,3,7.6);
+  /* Pass 24: exposed steel rhythm, glass concourses, and supporter light. */
+  for(const sz of[-1,1])for(let x=-60;x<=60;x+=15){
+    S.O.add(PRIM.box,0x69747d,x,13,sz*54,0,1.05,24,2.2,0,0,(x/60)*.08);
+    S.E.add(PRIM.box,(Math.round(x/15)&1)?0x5acb5a:0x68b8ff,x,8,sz*55.2,0,.16,8,.16);
+  }
+  S.G.add(PRIM.box,0x7897a8,72,14,0,0,2.4,24,62);
+  S.G.add(PRIM.box,0x7897a8,-72,14,0,0,2.4,24,62);
+  for(const sz of[-1,1])S.E.add(PRIM.box,0xb9e7ff,0,39,sz*39.2,0,118,.16,.18);
 },
 /* ---- BC Place: white dome with a crown of masts ---- */
 van(ctx){
@@ -1251,7 +1265,7 @@ function buildBowlInterior(ctx,sGroup){
    S.O.add(rg,0xb3aea3,0,topY+.6,0,0,1,1,sq);}
   /* apron + pitch */
   S.O.add(PRIM.disc,0x3c7a40,0,b.pitchY,0,0,(b.rx0)*2,.3,(b.rz0)*2);
-  const pm=new THREE.Mesh(pitchGeo,city.id==='mex'?aztecaPitchMat:(city.id==='la'?sofiPitchMat:(city.id==='ny'?metlifePitchMat:(city.id==='dal'?dallasPitchMat:(city.id==='mia'?miamiPitchMat:pitchMat)))));
+  const pm=new THREE.Mesh(pitchGeo,city.id==='mex'?aztecaPitchMat:(city.id==='la'?sofiPitchMat:(city.id==='ny'?metlifePitchMat:(city.id==='dal'?dallasPitchMat:(city.id==='mia'?miamiPitchMat:(city.id==='sea'?seattlePitchMat:pitchMat))))));
   pm.position.y=b.pitchY+.32;pm.receiveShadow=true;sGroup.add(pm);
   if(city.id==='mex'){
     /* walkout reveal: a quiet line of floor lights from tunnel to the pitch */
@@ -2510,6 +2524,39 @@ const miamiFestival={lights:[],targets:[],edgeMats:[],savedDayT:null,active:fals
   const sw=[0,0];fromStadLocal(st,-4.8,13.7,sw);sign.position.set(sw[0],st.city.py+st.bowl.pitchY+1.48,sw[1]);sign.rotation.y=st.rot;scene.add(sign);
 }
 
+/* Pass 24 — Seattle Rain City: wet steel, glass, and supporter pressure. */
+const seattleRain={lights:[],targets:[],savedDayT:null,active:false,t:0,pulse:0,wetMats:[]};
+{
+  const st=stadiums.sea,targetBase=new THREE.Vector3(st.center.x,st.city.py+st.bowl.pitchY+1.5,st.center.z);
+  const localLights=[[-60,36,-42],[-60,36,42],[60,36,-42],[60,36,42]];
+  for(let i=0;i<localLights.length;i++){
+    const p=localLights[i],v=new THREE.Vector3(p[0],p[1],p[2]).applyAxisAngle(Y,st.rot);
+    const target=new THREE.Object3D();target.position.copy(targetBase);scene.add(target);
+    const L=new THREE.SpotLight(i%2?0x5acb5a:0xb9e7ff,0,225,Math.PI*.19,.66,1.08);
+    L.position.set(st.center.x+v.x,st.city.py+st.bowl.pitchY+v.y,st.center.z+v.z);L.target=target;scene.add(L);
+    seattleRain.lights.push(L);seattleRain.targets.push(target);
+  }
+  const ent=st.entrance,dir=new THREE.Vector3().subVectors(st.center,ent);dir.y=0;dir.normalize();
+  const side=new THREE.Vector3(-dir.z,0,dir.x);
+  const gatePos=ent.clone().addScaledVector(dir,-7),yaw=Math.atan2(dir.x,dir.z),gate=new THREE.Group();gate.position.copy(gatePos);gate.rotation.y=yaw;scene.add(gate);
+  const B=new Batch(),E=new Batch();
+  for(const x of[-7.6,7.6]){B.add(PRIM.box,0x68747d,x,5.2,0,0,1,10.4,1);E.add(PRIM.box,x<0?0x68b8ff:0x5acb5a,x,5.2,-.58,0,.13,8.6,.12);}
+  B.add(PRIM.box,0xaeb8bf,0,10.45,0,0,16.2,.8,1.1);const bm=B.build(MAT.opaque,true),em=E.build(MAT.glow,false);if(bm)gate.add(bm);if(em)gate.add(em);
+  const tx=textTex('SEATTLE  •  RAIN CITY','#ffffff','#102330','900 58px "Segoe UI",sans-serif',1280,144);
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(13.8,1.55),new THREE.MeshBasicMaterial({map:tx,toneMapped:false}));sign.position.set(0,10.42,-.62);gate.add(sign);
+  /* Reflective pavement strips lead to the actual entrance. */
+  for(let i=0;i<12;i++){
+    const c=ent.clone().addScaledVector(dir,-15-i*6.1);
+    for(const s of[-1,1]){
+      const p=c.clone().addScaledVector(side,s*4.8),mat=new THREE.MeshPhysicalMaterial({color:s<0?0x4c95c9:0x398d54,roughness:.18,metalness:.05,clearcoat:.8,transparent:true,opacity:.74});
+      const tile=new THREE.Mesh(new THREE.BoxGeometry(.7,.08,2.8),mat);tile.position.set(p.x,st.city.py+.16,p.z);tile.rotation.y=yaw;scene.add(tile);seattleRain.wetMats.push(mat);
+    }
+  }
+  const gameTex=textTex('RAIN RUN','#ffffff','#112932','900 62px "Segoe UI",sans-serif',1024,128);
+  const gameSign=new THREE.Mesh(new THREE.PlaneGeometry(8.2,1.4),new THREE.MeshBasicMaterial({map:gameTex,toneMapped:false}));
+  const sw=[0,0];fromStadLocal(st,-17,-8.2,sw);gameSign.position.set(sw[0],st.city.py+st.bowl.pitchY+1.42,sw[1]);gameSign.rotation.y=st.rot;scene.add(gameSign);
+}
+
 /* ============================================================
    THE PROMENADE: golden road on the ground, park fabric between lands
    ============================================================ */
@@ -2650,20 +2697,20 @@ const fireworks=[];
    THE GRAND CIRCUIT: a coaster through all sixteen bowls
    ============================================================ */
 const TOUR=['van','sea','sf','la','gdl','mex','mty','hou','mia','atl','phi','ny','bos','tor','kc','dal'];
-const THROUGH=new Set(['kc','ny','bos','phi','tor','sf','sea','mex','mia','gdl']);
+const THROUGH=new Set(TOUR);
 /* Track profiles are authored per stadium rather than relying on one magic height.
    "open" and "gap" routes dive through a clear centerline; "dive" routes clear a
    roof ring/canopy before dropping through its opening; "over" routes clear the
    complete roof silhouette with a real safety margin. */
 const TRACK_PROFILE={
-  van:{kind:'over',roof:62}, sea:{kind:'gap',center:11,rim:39,opening:44,offsetZ:12},
-  sf:{kind:'gap',center:11,rim:35,opening:44}, la:{kind:'over',roof:67},
-  gdl:{kind:'dive',center:12,rim:48,opening:38}, mex:{kind:'dive',center:12,rim:53,opening:49},
-  mty:{kind:'over',roof:72}, hou:{kind:'over',roof:47},
-  mia:{kind:'dive',center:14,rim:49,opening:36}, atl:{kind:'over',roof:53},
+  van:{kind:'open',center:13,rim:22,opening:38}, sea:{kind:'gap',center:11,rim:34,opening:44,offsetZ:12},
+  sf:{kind:'gap',center:11,rim:32,opening:44}, la:{kind:'dive',center:14,rim:48,opening:42},
+  gdl:{kind:'dive',center:12,rim:48,opening:38,axis:'z'}, mex:{kind:'dive',center:12,rim:53,opening:49,axis:'z'},
+  mty:{kind:'open',center:13,rim:24,opening:38,axis:'z'}, hou:{kind:'gap',center:12,rim:30,opening:40},
+  mia:{kind:'dive',center:14,rim:49,opening:36}, atl:{kind:'dive',center:14,rim:45,opening:30},
   phi:{kind:'gap',center:11,rim:37,opening:43}, ny:{kind:'open',center:11,rim:36,opening:44},
   bos:{kind:'open',center:11,rim:39,opening:43,axis:'z'}, tor:{kind:'gap',center:11,rim:35,opening:41},
-  kc:{kind:'open',center:11,rim:36,opening:44}, dal:{kind:'over',roof:88},
+  kc:{kind:'open',center:11,rim:36,opening:44,axis:'z'}, dal:{kind:'open',center:14,rim:25,opening:42},
 };
 function trackAxisFor(c,prev,next){
   /* Stadium builders live in local space. Most traversals use the pitch's long
@@ -2804,15 +2851,31 @@ const coaster=(()=>{
     if(away.lengthSq()<1)away.set(-dir.z,0,dir.x);else away.normalize();
     const stationOut=stationPoint.clone().addScaledVector(away,22);
     stationOut.y=Math.max(terrainH(stationOut.x,stationOut.z)+7,stationPoint.y+1.2);
-    const lift=stationPoint.clone().addScaledVector(away,48);
-    const midFlat=new THREE.Vector3((lift.x+nextEntry.lead.x)*.5,0,(lift.z+nextEntry.lead.z)*.5);
-    const routeTerrain=Math.max(maxTerrainAlong(lift,midFlat),maxTerrainAlong(midFlat,nextEntry.lead));
-    const cruiseY=Math.max(126,routeTerrain+58,stationPoint.y+65,nextEntry.lead.y+12);
-    lift.y=cruiseY;
+    const lift=stationPoint.clone().addScaledVector(away,34);
     const dx=nextEntry.lead.x-lift.x,dz=nextEntry.lead.z-lift.z,L=Math.max(1,Math.hypot(dx,dz));
-    const px=-dz/L,pz=dx/L,offset=(hash2(i,47)-.5)*90;
-    const connector=new THREE.Vector3((lift.x+nextEntry.lead.x)*.5+px*offset,
-      cruiseY+8+hash2(i,49)*16,(lift.z+nextEntry.lead.z)*.5+pz*offset);
+    const px=-dz/L,pz=dx/L;
+    function obstacleClearance(A,B){
+      let clear=1e9;
+      for(let q=0;q<=20;q++){
+        const t=q/20,x=lerp(A.x,B.x,t),z=lerp(A.z,B.z,t);
+        /* Catmull-Rom rounds beyond its control polygon, so keep a generous
+           horizontal buffer around scenery instead of merely clearing its mesh. */
+        for(const col of colliders)clear=Math.min(clear,Math.hypot(x-col.x,z-col.z)-col.r-26);
+      }
+      return clear;
+    }
+    let connector=null,bestConnectorScore=-1e9;
+    for(const offset of[0,-54,54,-90,90,-132,132]){
+      const cand=new THREE.Vector3((lift.x+nextEntry.lead.x)*.5+px*offset,0,(lift.z+nextEntry.lead.z)*.5+pz*offset);
+      const clear=Math.min(obstacleClearance(lift,cand),obstacleClearance(cand,nextEntry.lead));
+      const score=clear-Math.abs(offset)*.035;
+      if(score>bestConnectorScore){bestConnectorScore=score;connector=cand;}
+    }
+    const routeTerrain=Math.max(maxTerrainAlong(lift,connector),maxTerrainAlong(connector,nextEntry.lead));
+    /* Keep connectors brisk and close to the park. Terrain still wins when it
+       genuinely needs clearance, but ordinary legs no longer climb into the sky. */
+    const cruiseY=Math.max(74,routeTerrain+26,stationPoint.y+32,nextEntry.lead.y+5);
+    lift.y=cruiseY;connector.y=cruiseY+1+hash2(i,49)*4;
     pts.push(stationIn,stationPoint,stationOut,lift,connector);
     stations.push({id:c.id,x:stationPoint.x,y:stationPoint.y,z:stationPoint.z});
   }
@@ -3038,7 +3101,9 @@ const coaster=(()=>{
   const sg=SG.build(MAT.glass,false);if(sg)scene.add(sg);
   const se=SE.build(MAT.glow,false);if(se)scene.add(se);
   /* the biggest drop, for the ride photo */
-  let uDrop=.5,best=0,minTerrainClear=1e9,overIntrusions=0,corridorMisses=0,colliderIntrusions=0;
+  let uDrop=.5,best=0,minTerrainClear=1e9,maxTrackY=-1e9,overIntrusions=0,corridorMisses=0,colliderIntrusions=0;
+  const bowlPasses=new Set();
+  const corridorMissCities=new Set(),colliderHits=[];
   let minUprightAlignment=1,invertedFrameSamples=0;
   for(let i=0;i<SAMP;i++){
     projectedUp.copy(worldUp).addScaledVector(tans[i],-worldUp.dot(tans[i]));
@@ -3050,24 +3115,32 @@ const coaster=(()=>{
     }
     const d=sp[i].y-sp[Math.min(SAMP,i+10)].y;if(d>best){best=d;uDrop=(i+5)/SAMP;}
     minTerrainClear=Math.min(minTerrainClear,sp[i].y-terrainH(sp[i].x,sp[i].z));
+    maxTrackY=Math.max(maxTrackY,sp[i].y);
     for(const c of CITIES){
       const st=stadiums[c.id],pr=TRACK_PROFILE[c.id],dx=sp[i].x-c.x,dz=sp[i].z-c.z,co=Math.cos(c.rot),si=Math.sin(c.rot);
       const lx=co*dx-si*dz,lz=si*dx+co*dz,inside=(lx*lx)/(st.bowl.rOutX*st.bowl.rOutX)+(lz*lz)/(st.bowl.rOutZ*st.bowl.rOutZ)<1;
       if(!inside)continue;
       const safeTop=pr.kind==='over'?pr.roof:pr.rim;
       const corridorDelta=pr.axis==='z'?Math.abs(lx-(pr.offsetX||0)):Math.abs(lz-(pr.offsetZ||0));
+      if(sp[i].y<=c.py+pr.rim+2&&corridorDelta<10)bowlPasses.add(c.id);
       if(sp[i].y<c.py+safeTop-1){
         if(pr.kind==='over')overIntrusions++;
-        else if(corridorDelta>8)corridorMisses++;
+        else if(corridorDelta>12){corridorMisses++;corridorMissCities.add(c.id);}
       }
     }
     for(const col of colliders){
       const rr=col.r+1.4;
-      if((sp[i].x-col.x)**2+(sp[i].z-col.z)**2<rr*rr&&sp[i].y<col.y+col.h+3&&sp[i].y>col.y-2){colliderIntrusions++;break;}
+      if((sp[i].x-col.x)**2+(sp[i].z-col.z)**2<rr*rr&&sp[i].y<col.y+col.h+3&&sp[i].y>col.y-2){
+        colliderIntrusions++;
+        if(colliderHits.length<24)colliderHits.push({i,x:+sp[i].x.toFixed(1),y:+sp[i].y.toFixed(1),z:+sp[i].z.toFixed(1),cx:+col.x.toFixed(1),cz:+col.z.toFixed(1),r:+col.r.toFixed(1)});
+        break;
+      }
     }
   }
-  const audit={minTerrainClear:+minTerrainClear.toFixed(2),overIntrusions,corridorMisses,colliderIntrusions,
+  const audit={length:+len.toFixed(1),minTerrainClear:+minTerrainClear.toFixed(2),maxTrackY:+maxTrackY.toFixed(1),overIntrusions,corridorMisses,colliderIntrusions,
     minUprightAlignment:+minUprightAlignment.toFixed(3),invertedFrameSamples,
+    bowlPasses:[...bowlPasses],bowlPassCount:bowlPasses.size,
+    corridorMissCities:[...corridorMissCities],colliderHits,
     supportColumns:ci,supportCaps:bi,samples:SAMP};
   return{curve,len,stations,railMat,spineMat,uDrop,frameAt,audit};
 })();
@@ -3127,7 +3200,7 @@ const cloudShadows=[];
     scene.add(m);cloudShadows.push({m,c});
   });
 }
-const ride={on:false,u:0,v:14,boost:1,dismount:false,holdE:0,dist:0,
+const ride={on:false,u:0,v:18,boost:1,dismount:false,holdE:0,dist:0,
   bYaw:0,bPitch:0,oYaw:0,oPitch:0,lastMouse:0,clackT:0};
 const rideT=new THREE.Vector3(),rideS=new THREE.Vector3(),rideU=new THREE.Vector3();
 const rideCamS=new THREE.Vector3(),rideCamU=new THREE.Vector3(),rideWorldUp=new THREE.Vector3(0,1,0);
@@ -3136,7 +3209,7 @@ const rideLookQ=new THREE.Quaternion(),rideLookEuler=new THREE.Euler(0,0,0,'YXZ'
 function startRide(id){
   const st=coaster.stations.find(s=>s.id===id)||coaster.stations[0];
   ride.on=true;ride.u=st.u;ride.dist=0;
-  ride.v=6;ride.dismount=false;ride.holdE=0;ride.photoDone=false;
+  ride.v=12;ride.dismount=false;ride.holdE=0;ride.photoDone=false;
   coaster.frameAt(st.u,rideT,rideS,rideU);
   rideCamS.copy(rideS);rideCamU.copy(rideU);
   /* Last-resort camera guard: even if a future authored element introduces a
@@ -3171,8 +3244,8 @@ function updateRide(dt){
   const p=cur.getPointAt(ride.u);
   const p2=cur.getPointAt((ride.u+.0008)%1);
   const slope=(p2.y-p.y)/Math.max(.6,p2.distanceTo(p));
-  ride.v+=(-26*slope)*dt;
-  ride.v+=(36-ride.v)*.28*dt;   /* chain lift on climbs, trim brakes on flats */
+  ride.v+=(-22*slope)*dt;
+  ride.v+=(52-ride.v)*.75*dt;   /* fast lift and short waits between bowls */
   if(ride.dismount){
     /* glide into the platform: harder brakes the closer the station */
     let near=1e9;
@@ -3183,7 +3256,7 @@ function updateRide(dt){
     const tv=near<70?6:13;
     ride.v+=(tv-ride.v)*1.6*dt;
   }
-  ride.v=clamp(ride.v,5,62);
+  ride.v=clamp(ride.v,9,70);
   const step=ride.v*ride.boost*dt;
   ride.dist+=step;
   const u0=ride.u;
@@ -3302,8 +3375,9 @@ function getContextAction(){
       const nyFlag=player.insideId==='ny'&&pg.label==='penalty shootout';
       const dalFlag=player.insideId==='dal'&&pg.label==='penalty shootout';
       const miaFlag=player.insideId==='mia'&&pg.label==='crossbar challenge';
-      return{id:'pitch_'+pg.label,key:'E',type:mexFlag?'Azteca match night':(nyFlag?'The Final':(dalFlag?'Dallas event':'Stadium game')),
-        title:mexFlag?'Take five penalties':(nyFlag?'Take the final five':(dalFlag?'Power Play':(miaFlag?'Neon Crossbar':niceAction(pg.label)))),sub:'',kind:'pitch',pg};
+      const seaFlag=player.insideId==='sea'&&pg.label==='dribble slalom';
+      return{id:'pitch_'+pg.label,key:'E',type:mexFlag?'Azteca match night':(nyFlag?'The Final':(dalFlag?'Dallas event':(seaFlag?'Rain City':'Stadium game'))),
+        title:mexFlag?'Take five penalties':(nyFlag?'Take the final five':(dalFlag?'Power Play':(miaFlag?'Neon Crossbar':(seaFlag?'Rain Run':niceAction(pg.label))))),sub:'',kind:'pitch',pg};
     }
     const st=stadiums[player.insideId];
     if(st&&st.insideExitLocal){
@@ -3566,31 +3640,23 @@ function checkGoal(){
    These must be initialized before any game-pad/challenge setup calls pkW(). */
 const _lo=[0,0],_wo=[0,0];
 
-/* one reusable challenge shell: title card, run state, result card */
+/* one reusable challenge shell; results return directly to the world. */
 const ch={phase:null,def:null};
-function chCard(title,body,medals,keys){
-  const c=$('card');
-  c.querySelector('h3').textContent=title;
-  c.querySelector('.body').innerHTML=body;
-  c.querySelector('.medals').innerHTML=medals||'';
-  c.querySelector('.keys').innerHTML=keys||'';
-  c.classList.add('on');
-}
 function startChallenge(def){
   /* The world is the menu: stepping onto a signed pad and pressing E starts immediately. */
-  ch.def=def;ch.phase='run';$('card').classList.remove('on');requestLock();def.begin();
+  ch.def=def;ch.phase='run';requestLock();def.begin();
   if(def.cue)flashHint(def.cue);
 }
-function chBegin(){if(!ch.def)return;ch.phase='run';$('card').classList.remove('on');requestLock();ch.def.begin();}
 function chResult(big,lines,medals){
-  ch.phase='result';
-  chCard(ch.def.title,'<div class="big">'+big+'</div>'+lines,medals||'','');
-  $('cardPrimary').textContent='Retry';$('cardSecondary').textContent='Explore';
-  $('cardPrimary').onclick=()=>{ch.phase='card';chBegin();};$('cardSecondary').onclick=chEnd;
+  const title=ch.def?.title||'Challenge complete';
+  const summary=document.createElement('div');summary.innerHTML=lines||'';
+  chEnd();
+  showBanner(big,title);
+  const plain=summary.textContent?.replace(/\s+/g,' ').trim();
+  if(plain)flashHint(plain);
 }
 function chEnd(){
   const d=ch.def;ch.phase=null;ch.def=null;
-  $('card').classList.remove('on');
   d&&d.cleanup&&d.cleanup();
   updateHud();requestLock();
 }
@@ -3958,12 +4024,12 @@ function cbFinish(){
 const sl={on:false,objs:[]};
 const SL_GOLD=19,SL_SILVER=22,SL_BRONZE=26;   /* my clean harness run: 17.3 s, +10/25/50 percent */
 function startSlalom(id){
-  const st=stadiums[id];
+  const st=stadiums[id],isRain=id==='sea';
   startChallenge({
-    title:'DRIBBLE SLALOM',
+    title:isRain?'RAIN RUN':'DRIBBLE SLALOM',
     rules:`Dribble the ball through the lit gates, then across the finish.<br>Missed gate +2 s · toppled cone +1 s.`,
     medals:`gold ${SL_GOLD}s &nbsp;·&nbsp; silver ${SL_SILVER}s &nbsp;·&nbsp; bronze ${SL_BRONZE}s`,
-    begin(){slBegin(st);},
+    begin(){sl.rainMode=isRain;slBegin(st);},
     hudText:()=>{
       const t=sl.started?((performance.now()-sl.t0)/1000+sl.pen):0;
       return `slalom · gate ${Math.min(sl.gi+1,sl.gates.length)}/${sl.gates.length} · ${t.toFixed(1)}s`;
@@ -4005,7 +4071,7 @@ function slBegin(st){
   player.yaw=Math.atan2(-(g1.x-pp.x),-(g1.z-pp.z));player.pitch=-.1;syncLook();
 }
 function slClear(){sl.objs.forEach(o=>scene.remove(o));sl.objs.length=0;}
-function slCleanup(){sl.on=false;slClear();}
+function slCleanup(){sl.on=false;sl.rainMode=false;slClear();}
 function slTick(dt){
   const st=sl.st;
   toStadLocal(st,ball.position.x,ball.position.z,_lo);
@@ -4021,6 +4087,7 @@ function slTick(dt){
       const w2=g2.fin?3.4:2.3;
       if(Math.abs(bz-g2.z)>w2){g2.missed=true;sl.pen+=2;}
       sl.gi++;
+      if(sl.rainMode)seattleRain.pulse=1;
       if(sl.gi>=sl.gates.length)slFinish();
     }
   }
@@ -4039,6 +4106,7 @@ function slTick(dt){
 }
 function slFinish(){
   if(sl.done)return;sl.done=true;
+  const wasRain=!!sl.rainMode;
   const t=(performance.now()-sl.t0)/1000+sl.pen;
   const medal=t<=SL_GOLD?'gold':t<=SL_SILVER?'silver':t<=SL_BRONZE?'bronze':null;
   const pts=medal==='gold'?300:medal==='silver'?160:medal==='bronze'?90:20;
@@ -4048,9 +4116,9 @@ function slFinish(){
   if(medal==='gold')addStar(id,'g');
   const bk='sl_'+id,best=save.d.bests[bk]||999;
   if(t<best){save.d.bests[bk]=+t.toFixed(1);save.w();}
-  if(medal==='gold')audio&&audio.pitchRoar();
+  if(medal==='gold'){audio&&audio.pitchRoar();if(wasRain)seattleRain.pulse=1.5;}
   slCleanup();
-  chResult(t.toFixed(1)+'s',(medal?medal.toUpperCase()+' medal':'no medal')+' · +'+pts+' points<br>best here: '+Math.min(t,best).toFixed(1)+'s','');
+  chResult(t.toFixed(1)+'s',(wasRain?'SEATTLE RAIN RUN · ':'')+(medal?medal.toUpperCase()+' medal':'no medal')+' · +'+pts+' points<br>best here: '+Math.min(t,best).toFixed(1)+'s','');
 }
 /* ---------------- game: keepy-uppy ---------------- */
 const ku={on:false};
@@ -5359,6 +5427,11 @@ function enterStadium(id){
       fromStadLocal(st,0,st.bowl.rz0+3.2,_wo);
       player.pos.set(_wo[0],st.city.py+st.bowl.pitchY+.35+CFG.eye,_wo[1]);
       const ctr=pkW(st,0,0);player.yaw=Math.atan2(-(ctr.x-player.pos.x),-(ctr.z-player.pos.z));player.pitch=.02;
+    }else if(id==='sea'){
+      seattleRain.savedDayT=dayT;dayT=.68;seattleRain.active=true;document.body.classList.add('seattle-rain');
+      fromStadLocal(st,0,st.bowl.rz0+3.2,_wo);
+      player.pos.set(_wo[0],st.city.py+st.bowl.pitchY+.35+CFG.eye,_wo[1]);
+      const ctr=pkW(st,0,0);player.yaw=Math.atan2(-(ctr.x-player.pos.x),-(ctr.z-player.pos.z));player.pitch=.018;
     }else player.pos.set(st.center.x-6,st.city.py+st.bowl.pitchY+.35+CFG.eye,st.center.z);
     player.vel.set(0,0,0);player.vy=0;
     syncLook();
@@ -5369,7 +5442,8 @@ function enterStadium(id){
       (id==='la'?'PREMIERE NIGHT · FOLLOW THE CYAN FLOOR LIGHTS':
       (id==='ny'?'THE FINAL · FOLLOW THE GOLD RUNWAY TO FINAL PRESSURE':
       (id==='dal'?'DALLAS EVENT NIGHT · FOLLOW THE BLUE STUDS TO POWER PLAY':
-      (id==='mia'?'TROPICAL NIGHT · FOLLOW THE AQUA AND CORAL LIGHTS TO NEON CROSSBAR':'four pitch games · follow the floor decals')))));
+      (id==='mia'?'TROPICAL NIGHT · FOLLOW THE AQUA AND CORAL LIGHTS TO NEON CROSSBAR':
+      (id==='sea'?'RAIN CITY · FOLLOW THE WET GREEN LIGHTS TO RAIN RUN':'four pitch games · follow the floor decals'))))));
     audio&&audio.enterRoar();
     updateHud();
   });
@@ -5396,6 +5470,10 @@ function exitStadium(){
     if(player.insideId==='mia'){
       if(miamiFestival.savedDayT!==null)dayT=miamiFestival.savedDayT;
       miamiFestival.savedDayT=null;miamiFestival.active=false;document.body.classList.remove('miami-festival');
+    }
+    if(player.insideId==='sea'){
+      if(seattleRain.savedDayT!==null)dayT=seattleRain.savedDayT;
+      seattleRain.savedDayT=null;seattleRain.active=false;document.body.classList.remove('seattle-rain');
     }
     mode='ground';player.insideId=null;
     const dir=new THREE.Vector3().subVectors(st.entrance,st.center);dir.y=0;dir.normalize();
@@ -5429,12 +5507,9 @@ addEventListener('keydown',e=>{
   keys[e.code]=true;
   if(e.code==='Tab'){e.preventDefault();toggleGuide();return;}
   if($('parkGuide').classList.contains('on')){if(e.code==='Escape')closeGuide();return;}
-  /* challenges own the keyboard while a card or run is up */
+  /* challenges own the keyboard while a run is active */
   if(ch.phase){
-    if(ch.phase==='result'){
-      if(e.code==='KeyR'||e.code==='Enter'){ch.phase='card';chBegin();}
-      else if(e.code==='Escape'||e.code==='Space')chEnd();
-    }else if(ch.phase==='run'&&e.code==='Escape'){
+    if(ch.phase==='run'&&e.code==='Escape'){
       if(ch.def.abort)ch.def.abort();
       chEnd();
     }
@@ -5753,6 +5828,7 @@ function updateSky(){
   if(nyFinal.active)renderer.toneMappingExposure*=1.13;
   if(dallasEvent.active)renderer.toneMappingExposure*=1.1;
   if(miamiFestival.active)renderer.toneMappingExposure*=1.12;
+  if(seattleRain.active)renderer.toneMappingExposure*=1.04;
   const elev=Math.sin((dayT-.25)*TAU);
   const az=dayT*TAU+.9;
   const ch=Math.sqrt(Math.max(.06,1-elev*elev));
@@ -5773,7 +5849,7 @@ function updateSky(){
   waterUni.uSunDir.value.copy(sunDirV);
   waterUni.uCamPos.value.copy(camera.position);
   refreshEnv();
-  if(bloomPass)bloomPass.strength=(.22+.55*nightAmt)*(1+hi*.35*(1-nightAmt));
+  if(bloomPass)bloomPass.strength=(.13+.30*nightAmt)*(1+hi*.18*(1-nightAmt));
   stars.material.opacity=nightAmt*.9;
   bandStars.material.opacity=nightAmt*.55;
   /* lens flare when looking sunward */
@@ -5790,16 +5866,17 @@ function updateSky(){
     raySpr.position.copy(camera.position).addScaledVector(sunDirV,2400);
     raySpr.material.opacity=k*low*(1-nightAmt)*.42;
   }
-  MAT.glow.opacity=clamp(nightAmt*(glowLevel?1.3:.6),0,1);
-  const gOp=nightAmt*.55*glowLevel;
+  /* Light bars should guide, not flatten the architecture into white strips. */
+  MAT.glow.opacity=clamp(nightAmt*(glowLevel ? .42 : .2),0,.42);
+  const gOp=nightAmt*.24*glowLevel;
   for(const s of glowSprites)s.material.opacity=gOp;
   const trackGlow=nightAmt>.25?(glowLevel?0x3a3418:0x141208):0x000000;
   coaster.railMat.emissive.setHex(trackGlow);
   coaster.spineMat.emissive.setHex(trackGlow?0x17150d:0x000000);
-  ribbonUni.uBoost.value=Math.min(1+2.2*nightAmt+hi*.9,2.4);
+  ribbonUni.uBoost.value=Math.min(1+.75*nightAmt+hi*.35,1.65);
   flagUni.uLight.value=1-nightAmt*.8;
   waterUni.uLight.value=1-nightAmt*.85;
-  for(const bb of beaconMats)bb.m.opacity=bb.tier*(.05+.24*nightAmt);
+  for(const bb of beaconMats)bb.m.opacity=bb.tier*(.025+.10*nightAmt);
   /* sun follows the player for tight shadows */
   sun.position.copy(player.pos).addScaledVector(sunDirV,900);
   sun.target.position.copy(player.pos);
@@ -5865,8 +5942,17 @@ function updateSky(){
       stadiums.mia.center.z+Math.sin(a*1.22)*10);L.intensity+=(miaOn*13-L.intensity)*.1;
   }
   miamiFestival.pulse*=.91;
-  for(let i=0;i<miamiFestival.edgeMats.length;i++)miamiFestival.edgeMats[i].opacity=(miamiFestival.active ? .45 : .08)+miamiFestival.pulse*.38+Math.sin(miamiFestival.t*2.2+i)*.06*miaOn;
+  for(let i=0;i<miamiFestival.edgeMats.length;i++)miamiFestival.edgeMats[i].opacity=(miamiFestival.active ? .2 : .035)+miamiFestival.pulse*.16+Math.sin(miamiFestival.t*2.2+i)*.025*miaOn;
   if(miamiFestival.active){stadiumLight.intensity=Math.max(stadiumLight.intensity,13);stadiumLight.color.setHex(0xbdfcff);}
+  const seaOn=seattleRain.active?1:0;seattleRain.t+=.015;
+  for(let i=0;i<seattleRain.lights.length;i++){
+    const L=seattleRain.lights[i],tar=seattleRain.targets[i],a=seattleRain.t*(.38+i*.02)+i*TAU/4;
+    tar.position.set(stadiums.sea.center.x+Math.cos(a)*13,stadiums.sea.city.py+stadiums.sea.bowl.pitchY+1.7,
+      stadiums.sea.center.z+Math.sin(a*1.16)*9);L.intensity+=(seaOn*14-L.intensity)*.1;
+  }
+  seattleRain.pulse*=.9;
+  for(let i=0;i<seattleRain.wetMats.length;i++)seattleRain.wetMats[i].emissive?.setHex(i%2?0x103820:0x102b40),seattleRain.wetMats[i].emissiveIntensity=.08+seattleRain.pulse*.5;
+  if(seattleRain.active){stadiumLight.intensity=Math.max(stadiumLight.intensity,14);stadiumLight.color.setHex(0xcdeeff);}
 }
 
 /* ============================================================
@@ -6275,6 +6361,7 @@ window.__wc={
   guide:toggleGuide,action:()=>getContextAction(),dash:()=>dash.on?{i:dash.i,t:+dash.t.toFixed(1)}:null,
   cities:CITIES.map(c=>c.id),
 };
+document.documentElement.dataset.trackAudit=JSON.stringify(coaster.audit);
 buildComposer();
 updateHud();
 animate();
